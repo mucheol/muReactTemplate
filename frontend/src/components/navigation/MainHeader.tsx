@@ -13,7 +13,7 @@ const NAV_ITEMS = [
 ];
 
 const navButtonSx = {
-  py: 1.5,
+  py:1,
   '&:hover': { bgcolor: 'transparent', color: 'black' },
 } as const;
 
@@ -25,7 +25,7 @@ export const MainHeader: React.FC = () => {
         sx={{
           position: 'relative',
           px: 2,
-          py: 3,
+          minHeight: 40,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -55,7 +55,7 @@ export const MainHeader: React.FC = () => {
       <Toolbar
         sx={{
           gap: 1,
-          minHeight: 48,
+          minHeight: 30,
           px:0,
         }}
       >
@@ -99,6 +99,7 @@ export const MainHeader: React.FC = () => {
           justifyContent: 'flex-end',
           gap: 0.5,
           backgroundColor: 'background.paper',
+          
         }}
       >
         <Button
