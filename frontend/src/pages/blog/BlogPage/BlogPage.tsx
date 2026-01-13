@@ -1,18 +1,133 @@
-import React from 'react';
-import { Box, Card, CardContent, Container, Grid, Typography, Chip, Stack, Pagination } from '@mui/material';
+import React, { useState, useMemo } from 'react';
+import { useSearchParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Typography,
+  Chip,
+  Stack,
+  Pagination,
+  TextField,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import {
+  ALL_POSTS,
+  CATEGORIES,
+  TAGS,
+  getPopularPosts,
+  getPostsByCategory,
+  getPostsByTag,
+  searchPosts,
+} from '../data/blogData';
 
-// 더미 블로그 포스트 데이터
-const DUMMY_POSTS = Array.from({ length: 6 }, (_, i) => ({
-  id: i + 1,
-  title: `포스트 제목 ${i + 1}`,
-  excerpt: `내용 미리보기 ${i + 1} - 이 글은 블로그 포스트의 요약 내용입니다. 더 자세한 내용은 클릭하여 확인하세요.`,
-  category: ['기술', '일상', '리뷰'][i % 3],
-  date: `2024.01.${String(15 - i).padStart(2, '0')}`,
-}));
-
-const CATEGORIES = ['전체', '기술', '일상', '리뷰', '여행'];
+const POSTS_PER_PAGE = 6;
 
 const BlogPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // URL 파라미터에서 상태 읽기
+  const currentPage = Number(searchParams.get('page')) || 1;
+  const selectedCategory = searchParams.get('category') || '전체';
+  const selectedTag = searchParams.get('tag') || '';
+  const searchQuery = searchParams.get('q') || '';
+
+  // 검색 입력 상태
+  const [searchInput, setSearchInput] = useState(searchQuery);
+
+  // 인기 포스트
+  const popularPosts = useMemo(() => getPopularPosts().slice(0, 3), []);
+
+  // 필터링된 포스트 목록
+  const filteredPosts = useMemo(() => {
+    let posts = ALL_POSTS;
+
+    // 검색어 필터
+    if (searchQuery) {
+      posts = searchPosts(searchQuery);
+    }
+    // 태그 필터
+    else if (selectedTag) {
+      posts = getPostsByTag(selectedTag);
+    }
+    // 카테고리 필터
+    else if (selectedCategory !== '전체') {
+      posts = getPostsByCategory(selectedCategory);
+    }
+
+    return posts;
+  }, [searchQuery, selectedTag, selectedCategory]);
+
+  // 페이지네이션
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE
+  );
+
+  // 페이지 변경
+  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', String(page));
+    setSearchParams(params);
+  };
+
+  // 카테고리 선택
+  const handleCategoryClick = (category: string) => {
+    const params = new URLSearchParams();
+    if (category !== '전체') {
+      params.set('category', category);
+    }
+    setSearchParams(params);
+    setSearchInput('');
+  };
+
+  // 태그 선택
+  const handleTagClick = (tag: string) => {
+    const params = new URLSearchParams();
+    params.set('tag', tag);
+    setSearchParams(params);
+    setSearchInput('');
+  };
+
+  // 검색 실행
+  const handleSearch = () => {
+    if (searchInput.trim()) {
+      const params = new URLSearchParams();
+      params.set('q', searchInput.trim());
+      setSearchParams(params);
+    }
+  };
+
+  // 검색어 입력 시 엔터키 처리
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // 필터 초기화
+  const handleClearFilter = () => {
+    setSearchParams({});
+    setSearchInput('');
+  };
+
+  // 현재 필터 상태 표시
+  const getFilterLabel = () => {
+    if (searchQuery) return `검색: "${searchQuery}"`;
+    if (selectedTag) return `태그: ${selectedTag}`;
+    if (selectedCategory !== '전체') return `카테고리: ${selectedCategory}`;
+    return null;
+  };
+
+  const filterLabel = getFilterLabel();
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 페이지 타이틀 */}
@@ -20,32 +135,52 @@ const BlogPage: React.FC = () => {
         블로그
       </Typography>
 
-      <Grid container spacing={4}>
+      {/* 현재 필터 표시 */}
+      {filterLabel && (
+        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Chip
+            label={filterLabel}
+            onDelete={handleClearFilter}
+            color="primary"
+            variant="outlined"
+          />
+          <Typography variant="body2" color="text.secondary">
+            {filteredPosts.length}개의 포스트
+          </Typography>
+        </Box>
+      )}
+
+      {/* 메인 레이아웃 */}
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
         {/* 메인 콘텐츠 영역 */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 66.67%' }, minWidth: 0 }}>
           {/* 포스트 목록 */}
-          <Stack spacing={3}>
-            {DUMMY_POSTS.map((post) => (
-              <Card key={post.id} sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}>
-                <Grid container>
-                  {/* 썸네일 이미지 영역 */}
-                  <Grid size={{ xs: 12, sm: 4 }}>
+          {paginatedPosts.length > 0 ? (
+            <Stack spacing={3}>
+              {paginatedPosts.map((post) => (
+                <Card
+                  key={post.id}
+                  sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}
+                  onClick={() => navigate(`/blog/${post.id}`)}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}>
+                    {/* 썸네일 이미지 영역 */}
                     <Box
                       sx={{
-                        height: { xs: 160, sm: '100%' },
-                        minHeight: 140,
+                        width: { xs: '100%', sm: 180 },
+                        height: { xs: 160, sm: 'auto' },
+                        minHeight: { sm: 140 },
                         bgcolor: 'grey.200',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        flexShrink: 0,
                       }}
                     >
                       <Typography color="text.secondary">이미지 {post.id}</Typography>
                     </Box>
-                  </Grid>
-                  {/* 포스트 내용 영역 */}
-                  <Grid size={{ xs: 12, sm: 8 }}>
-                    <CardContent>
+                    {/* 포스트 내용 영역 */}
+                    <CardContent sx={{ flex: 1 }}>
                       <Chip label={post.category} size="small" sx={{ mb: 1 }} />
                       <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
                         {post.title}
@@ -53,24 +188,45 @@ const BlogPage: React.FC = () => {
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                         {post.excerpt}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {post.date}
-                      </Typography>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography variant="caption" color="text.secondary">
+                          {post.date}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          조회수 {post.views}
+                        </Typography>
+                      </Stack>
                     </CardContent>
-                  </Grid>
-                </Grid>
-              </Card>
-            ))}
-          </Stack>
+                  </Box>
+                </Card>
+              ))}
+            </Stack>
+          ) : (
+            <Box sx={{ py: 8, textAlign: 'center' }}>
+              <Typography variant="h6" color="text.secondary">
+                포스트가 없습니다.
+              </Typography>
+              <Button variant="text" onClick={handleClearFilter} sx={{ mt: 2 }}>
+                전체 보기
+              </Button>
+            </Box>
+          )}
 
           {/* 페이지네이션 */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Pagination count={5} color="primary" />
-          </Box>
-        </Grid>
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+              />
+            </Box>
+          )}
+        </Box>
 
         {/* 사이드바 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 33.33%' }, maxWidth: { md: 320 } }}>
           <Stack spacing={3}>
             {/* 검색 영역 */}
             <Card>
@@ -78,20 +234,30 @@ const BlogPage: React.FC = () => {
                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
                   검색
                 </Typography>
-                <Box
-                  sx={{
-                    height: 40,
-                    bgcolor: 'grey.100',
-                    borderRadius: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="검색어를 입력하세요"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {searchInput && (
+                            <IconButton size="small" onClick={() => setSearchInput('')}>
+                              <ClearIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                          <IconButton size="small" onClick={handleSearch}>
+                            <SearchIcon fontSize="small" />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
                   }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    검색 입력창
-                  </Typography>
-                </Box>
+                />
               </CardContent>
             </Card>
 
@@ -105,13 +271,26 @@ const BlogPage: React.FC = () => {
                   {CATEGORIES.map((category) => (
                     <Box
                       key={category}
+                      onClick={() => handleCategoryClick(category)}
                       sx={{
                         py: 1,
                         px: 2,
-                        bgcolor: 'grey.50',
+                        bgcolor:
+                          selectedCategory === category && !searchQuery && !selectedTag
+                            ? 'primary.light'
+                            : 'grey.50',
+                        color:
+                          selectedCategory === category && !searchQuery && !selectedTag
+                            ? 'primary.contrastText'
+                            : 'text.primary',
                         borderRadius: 1,
                         cursor: 'pointer',
-                        '&:hover': { bgcolor: 'grey.100' },
+                        '&:hover': {
+                          bgcolor:
+                            selectedCategory === category && !searchQuery && !selectedTag
+                              ? 'primary.main'
+                              : 'grey.100',
+                        },
                       }}
                     >
                       <Typography variant="body2">{category}</Typography>
@@ -128,8 +307,19 @@ const BlogPage: React.FC = () => {
                   인기 포스트
                 </Typography>
                 <Stack spacing={2}>
-                  {[1, 2, 3].map((num) => (
-                    <Box key={num} sx={{ display: 'flex', gap: 2 }}>
+                  {popularPosts.map((post) => (
+                    <Box
+                      key={post.id}
+                      component={RouterLink}
+                      to={`/blog/${post.id}`}
+                      sx={{
+                        display: 'flex',
+                        gap: 2,
+                        textDecoration: 'none',
+                        color: 'inherit',
+                        '&:hover': { opacity: 0.8 },
+                      }}
+                    >
                       <Box
                         sx={{
                           width: 60,
@@ -143,15 +333,15 @@ const BlogPage: React.FC = () => {
                         }}
                       >
                         <Typography variant="caption" color="text.secondary">
-                          썸네일 {num}
+                          썸네일
                         </Typography>
                       </Box>
                       <Box sx={{ minWidth: 0 }}>
                         <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>
-                          인기 포스트 제목 {num}
+                          {post.title}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          2024.01.{10 + num}
+                          {post.date} · 조회수 {post.views}
                         </Typography>
                       </Box>
                     </Box>
@@ -167,12 +357,14 @@ const BlogPage: React.FC = () => {
                   태그
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {['React', 'TypeScript', 'MUI', 'Vite', 'Node.js', 'CSS', 'JavaScript'].map((tag) => (
+                  {TAGS.map((tag) => (
                     <Chip
                       key={tag}
                       label={tag}
                       size="small"
-                      variant="outlined"
+                      variant={selectedTag === tag ? 'filled' : 'outlined'}
+                      color={selectedTag === tag ? 'primary' : 'default'}
+                      onClick={() => handleTagClick(tag)}
                       sx={{ cursor: 'pointer' }}
                     />
                   ))}
@@ -180,8 +372,8 @@ const BlogPage: React.FC = () => {
               </CardContent>
             </Card>
           </Stack>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Container>
   );
 };

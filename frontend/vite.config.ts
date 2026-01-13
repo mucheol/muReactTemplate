@@ -10,4 +10,7 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    host: true, // 네트워크 노출 (0.0.0.0)
+  },
 })
