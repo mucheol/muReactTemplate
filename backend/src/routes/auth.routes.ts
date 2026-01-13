@@ -54,9 +54,12 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' });
   }
 
+  // 문자열 토큰 (나중에 JWT로 교체 가능)
+  const token = `fake-${user.id}-${Date.now()}`;
+
   return res.status(200).json({
     message: '로그인 성공',
-    token: 'dummy-token',
+    token,
     user: {
       id: user.id,
       email: user.email,
