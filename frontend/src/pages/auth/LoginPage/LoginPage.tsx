@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../../modules/auth';
 
 type LoginValues = {
@@ -13,6 +14,7 @@ type LoginErrors = {
 };
 
 const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
   const [values, setValues] = useState<LoginValues>({ email: '', password: '' });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -75,8 +77,15 @@ const LoginPage: React.FC = () => {
     try {
       const response = await authApi.login(values);
       console.log('login success', response.data);
+
+      // localStorage에 사용자 정보 저장
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('token', response.data.token);
+      // 같은 탭 내 컴포넌트들에게 로그인 상태 변경 알림
+      window.dispatchEvent(new Event('auth-change'));
+
       alert('로그인 성공');
-      // TODO: 토큰 저장, 리다이렉트 등 처리
+      navigate('/');
     } catch (error: any) {
       console.error('login error', error);
       alert(error?.response?.data?.message ?? '로그인에 실패했습니다.');

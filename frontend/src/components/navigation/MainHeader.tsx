@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Button, Stack, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 // 기본 헤더 컴포넌트 (모바일 우선)
 const NAV_ITEMS = [
@@ -18,6 +18,47 @@ const navButtonSx = {
 } as const;
 
 export const MainHeader: React.FC = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+
+  // 로그인 상태 확인
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      const userStr = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+
+      if (userStr && token) {
+        setIsLoggedIn(true);
+        setUser(JSON.parse(userStr));
+      } else {
+        setIsLoggedIn(false);
+        setUser(null);
+      }
+    };
+
+    checkLoginStatus();
+
+    // storage 이벤트 리스너 (다른 탭에서 로그인/로그아웃 시 동기화)
+    window.addEventListener('storage', checkLoginStatus);
+    // 같은 탭에서 로그인/로그아웃 시 동기화 (커스텀 이벤트)
+    window.addEventListener('auth-change', checkLoginStatus);
+
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+      window.removeEventListener('auth-change', checkLoginStatus);
+    };
+  }, []);
+
+  // 로그아웃 처리
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setUser(null);
+    navigate('/');
+  };
+
   return (
     <AppBar position="static" color="primary" sx={{ boxShadow: 1 }}>
       {/* 1줄: 상단 로고 + 햄버거 바 */}
@@ -99,27 +140,53 @@ export const MainHeader: React.FC = () => {
           justifyContent: 'flex-end',
           gap: 0.5,
           backgroundColor: 'background.paper',
-          
+
         }}
       >
-        <Button
-          color="inherit"
-          size="small"
-          component={RouterLink}
-          to="/login"
-          sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
-        >
-          로그인
-        </Button>
-        <Button
-          color="inherit"
-          size="small"
-          component={RouterLink}
-          to="/register"
-          sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
-        >
-          회원가입
-        </Button>
+        {isLoggedIn ? (
+          // 로그인된 경우: 마이페이지, 로그아웃
+          <>
+            <Button
+              color="inherit"
+              size="small"
+              component={RouterLink}
+              to="/mypage"
+              sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
+            >
+              마이페이지
+            </Button>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={handleLogout}
+              sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
+            >
+              로그아웃
+            </Button>
+          </>
+        ) : (
+          // 로그인 안 된 경우: 로그인, 회원가입
+          <>
+            <Button
+              color="inherit"
+              size="small"
+              component={RouterLink}
+              to="/login"
+              sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
+            >
+              로그인
+            </Button>
+            <Button
+              color="inherit"
+              size="small"
+              component={RouterLink}
+              to="/register"
+              sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
+            >
+              회원가입
+            </Button>
+          </>
+        )}
       </Box>
     </AppBar>
   );
