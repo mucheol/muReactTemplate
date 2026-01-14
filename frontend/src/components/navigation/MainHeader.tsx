@@ -9,7 +9,9 @@ const NAV_ITEMS = [
   { label: '블로그', path: '/blog' },
   { label: '쇼핑몰', path: '/shop' },
   { label: '이벤트', path: '/event' },
-  { label: '마이페이지', path: '/mypage' },
+  { label: '대시보드', path: '/dashboard' },
+  { label: 'FAQ', path: '/faq' },
+  { label: '예약', path: '/reservation' },
 ];
 
 const navButtonSx = {
