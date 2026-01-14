@@ -27,6 +27,7 @@ import {
 import type { SortOption } from '../data/shopData';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
+// @ts-ignore: CSS module has no type declarations
 import 'swiper/css';
 import ProductCard from '../components/ProductCard';
 

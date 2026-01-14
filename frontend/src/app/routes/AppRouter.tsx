@@ -10,6 +10,11 @@ import BlogDetailPage from '../../pages/blog/BlogDetailPage/BlogDetailPage';
 import ShopPage from '../../pages/shop/ShopPage/ShopPage';
 import ShopDetailPage from '../../pages/shop/ShopDetailPage/ShopDetailPage';
 import { MainLayout } from '../../layouts/main/MainLayout';
+import EventPage from '../../pages/event/EventPage/EventPage';
+import DiscountEventDetailPage from '../../pages/event/EventDetailPage/DiscountEventDetailPage';
+import CouponEventDetailPage from '../../pages/event/EventDetailPage/CouponEventDetailPage';
+import PrizeEventDetailPage from '../../pages/event/EventDetailPage/PrizeEventDetailPage';
+import PromotionEventDetailPage from '../../pages/event/EventDetailPage/PromotionEventDetailPage';
 
 // 메인 라우터: 각 페이지와 레이아웃을 연결하는 곳
 export const AppRouter: React.FC = () => {
@@ -26,6 +31,11 @@ export const AppRouter: React.FC = () => {
           <Route path="/blog/:id" element={<BlogDetailPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/shop/:id" element={<ShopDetailPage />} />
+          <Route path="/event" element={<EventPage />} />
+          <Route path='/event/discount' element={<DiscountEventDetailPage />}/>
+          <Route path='/event/coupon' element={<CouponEventDetailPage />}/>
+          <Route path='/event/prize' element={<PrizeEventDetailPage />}/>
+          <Route path='/event/promotion' element={<PromotionEventDetailPage />}/>
         </Routes>
       </MainLayout>
     </BrowserRouter>

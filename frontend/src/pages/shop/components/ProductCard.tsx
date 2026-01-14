@@ -7,7 +7,8 @@ import {
   Rating,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Product, formatPrice, getDiscountRate } from '../data/shopData';
+import type { Product } from '../data/shopData';
+import { formatPrice, getDiscountRate } from '../data/shopData';
 
 interface ProductCardProps {
   product: Product;
