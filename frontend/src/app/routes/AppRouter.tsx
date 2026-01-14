@@ -7,6 +7,8 @@ import FindPasswordPage from '../../pages/auth/FindPasswordPage/FindPasswordPage
 import MyPage from '../../pages/user/MyPage/MyPage';
 import BlogPage from '../../pages/blog/BlogPage/BlogPage';
 import BlogDetailPage from '../../pages/blog/BlogDetailPage/BlogDetailPage';
+import ShopPage from '../../pages/shop/ShopPage/ShopPage';
+import ShopDetailPage from '../../pages/shop/ShopDetailPage/ShopDetailPage';
 import { MainLayout } from '../../layouts/main/MainLayout';
 
 // 메인 라우터: 각 페이지와 레이아웃을 연결하는 곳
@@ -22,6 +24,8 @@ export const AppRouter: React.FC = () => {
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:id" element={<BlogDetailPage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/shop/:id" element={<ShopDetailPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
