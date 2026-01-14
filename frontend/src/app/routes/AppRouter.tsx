@@ -15,11 +15,13 @@ import DiscountEventDetailPage from '../../pages/event/EventDetailPage/DiscountE
 import CouponEventDetailPage from '../../pages/event/EventDetailPage/CouponEventDetailPage';
 import PrizeEventDetailPage from '../../pages/event/EventDetailPage/PrizeEventDetailPage';
 import PromotionEventDetailPage from '../../pages/event/EventDetailPage/PromotionEventDetailPage';
+import { ScrollToTop } from '../../components/common/ScrollToTop';
 
 // 메인 라우터: 각 페이지와 레이아웃을 연결하는 곳
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <MainLayout>
         <Routes>
           <Route path="/" element={<HomePage />} />
