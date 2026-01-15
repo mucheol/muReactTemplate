@@ -22,7 +22,10 @@ export const FaqTabs: React.FC<FaqTabsProps> = ({
       scrollButtons="auto"
       sx={{
         px: 2,
-        '& .MuiTab-root': { textTransform: 'none', fontSize: 14, minHeight: 44 },
+        '& .MuiTab-root': { textTransform: 'none', fontSize: 14, minHeight: 44,outline: 'none',
+          '&:focus-visible': {
+            outline: 'none',
+          }, },
       }}
     >
       {(Object.keys(CATEGORY_LABELS) as FaqCategory[]).map((key) => (
