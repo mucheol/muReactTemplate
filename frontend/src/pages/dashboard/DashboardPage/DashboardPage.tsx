@@ -91,7 +91,7 @@ const DashboardPage: React.FC = () => {
               borderRadius: 2,
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              minWidth: 220,
+              width: '100%',
             }}
           >
             <CardContent sx={{ py: 1.5, px: 2 }}>
@@ -114,18 +114,26 @@ const DashboardPage: React.FC = () => {
             <Stack
               direction={{ xs: 'column', md: 'row' }}
               spacing={2}
-              alignItems={{ xs: 'flex-start', md: 'center' }}
+              alignItems={{ xs: 'flex-end', md: 'center' }}
             >
-              <Stack direction="row" spacing={2}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 2,
+                  width: { xs: '100%', md: 320 }, // md 이상에서는 전체 중 320px 영역에서 1:1
+                  flexShrink: 0,
+                }}
+              >
                 <TextField
                   select
+                  fullWidth
                   size="small"
                   label="기간"
                   value={period}
                   onChange={(e) =>
                     setPeriod(e.target.value as 'today' | '7d' | '30d')
                   }
-                  sx={{ minWidth: 160 }}
                 >
                   <MenuItem value="today">오늘</MenuItem>
                   <MenuItem value="7d">최근 7일</MenuItem>
@@ -134,19 +142,19 @@ const DashboardPage: React.FC = () => {
 
                 <TextField
                   select
+                  fullWidth
                   size="small"
                   label="채널"
                   value={channel}
                   onChange={(e) =>
                     setChannel(e.target.value as 'all' | 'web' | 'mobile')
                   }
-                  sx={{ minWidth: 160 }}
                 >
                   <MenuItem value="all">전체</MenuItem>
                   <MenuItem value="web">웹</MenuItem>
                   <MenuItem value="mobile">모바일</MenuItem>
                 </TextField>
-              </Stack>
+              </Box>
 
               <Box sx={{ flexGrow: 1 }} />
 
@@ -260,7 +268,7 @@ const DashboardPage: React.FC = () => {
                     p: 1,
                   }}
                 >
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height={260}>
                     <LineChart
                       data={trafficData}
                       margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
@@ -341,41 +349,37 @@ const DashboardPage: React.FC = () => {
                     mt: 2,
                     borderRadius: 1,
                     bgcolor: 'grey.100',
-                    flexGrow: 1,
                     p: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
                   }}
                 >
-                  <Box sx={{ flexGrow: 1 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={channelPieData}
-                          dataKey="value"
-                          nameKey="name"
-                          outerRadius={65}
-                          innerRadius={22}
-                          paddingAngle={1}
-                          label={false}
-                        >
-                          {channelPieData.map((_, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={PIE_COLORS[index % PIE_COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
+                  {/* ✅ flex 레이아웃 제거, 고정 높이로 처리 */}
+                  <ResponsiveContainer width="100%" height={180}>
+                    <PieChart>
+                      <Pie
+                        data={channelPieData}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={65}
+                        innerRadius={22}
+                        paddingAngle={1}
+                        label={false}
+                      >
+                        {channelPieData.map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={PIE_COLORS[index % PIE_COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
 
-                        <Tooltip
-                          formatter={(value: number | undefined, name: string | undefined) => [
-                            `${value ?? 0}%`,
-                            name ?? '',
-                          ]}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
+                      <Tooltip
+                        formatter={(
+                          value: number | undefined,
+                          name: string | undefined,
+                        ) => [`${value ?? 0}%`, name ?? '']}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
 
                   {/* 차트 아래에 색 + 텍스트로 항목/비율 표시 */}
                   <Stack
