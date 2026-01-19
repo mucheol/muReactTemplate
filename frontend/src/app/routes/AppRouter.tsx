@@ -4,7 +4,7 @@ import HomePage from '../../pages/home/HomePage';
 import LoginPage from '../../pages/auth/LoginPage/LoginPage';
 import RegisterPage from '../../pages/auth/RegisterPage/RegisterPage';
 import FindPasswordPage from '../../pages/auth/FindPasswordPage/FindPasswordPage';
-import MyPage from '../../pages/user/MyPage/MyPage';
+import MyPage from '../../pages/user/MyPage';
 import BlogPage from '../../pages/blog/BlogPage/BlogPage';
 import BlogDetailPage from '../../pages/blog/BlogDetailPage/BlogDetailPage';
 import ShopPage from '../../pages/shop/ShopPage/ShopPage';
@@ -44,6 +44,7 @@ export const AppRouter: React.FC = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/reservation" element={<ReservationPage />} />
+          <Route path="/mypage" element={<MyPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
