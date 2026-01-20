@@ -28,8 +28,8 @@ export const AppRouter: React.FC = () => {
       <MainLayout>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route path="/auth/register" element={<RegisterPage />} />
           <Route path="/find-password" element={<FindPasswordPage />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/blog" element={<BlogPage />} />

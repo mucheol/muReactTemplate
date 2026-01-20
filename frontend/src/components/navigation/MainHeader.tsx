@@ -202,7 +202,7 @@ export const MainHeader: React.FC = () => {
                 color="inherit"
                 size="small"
                 component={RouterLink}
-                to="/login"
+                to="/auth/login"
                 sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
               >
                 로그인
@@ -211,7 +211,7 @@ export const MainHeader: React.FC = () => {
                 color="inherit"
                 size="small"
                 component={RouterLink}
-                to="/register"
+                to="/auth/register"
                 sx={{ minWidth: 'auto', fontSize: 12, textTransform: 'none', color: 'primary.main' }}
               >
                 회원가입
@@ -266,7 +266,7 @@ export const MainHeader: React.FC = () => {
                   fullWidth
                   size="small"
                   variant="contained"
-                  onClick={() => handleNavClick('/login')}
+                  onClick={() => handleNavClick('/auth/login')}
                 >
                   로그인
                 </Button>
@@ -274,7 +274,7 @@ export const MainHeader: React.FC = () => {
                   fullWidth
                   size="small"
                   variant="outlined"
-                  onClick={() => handleNavClick('/register')}
+                  onClick={() => handleNavClick('/auth/register')}
                 >
                   회원가입
                 </Button>
