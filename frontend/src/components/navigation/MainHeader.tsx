@@ -14,17 +14,15 @@ import {
   Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 // 기본 헤더 컴포넌트 (모바일 우선)
 const NAV_ITEMS = [
-  { label: '홈', path: '/' },
   { label: '블로그', path: '/blog' },
   { label: '쇼핑몰', path: '/shop' },
   { label: '이벤트', path: '/event' },
-  { label: '대시보드', path: '/dashboard' },
   { label: 'FAQ', path: '/faq' },
-  { label: '예약', path: '/reservation' },
 ];
 
 const navButtonSx = {
@@ -125,6 +123,18 @@ export const MainHeader: React.FC = () => {
           >
             muReactTemplate
           </Typography>
+
+          {/* 우측 상단 관리자 모드 버튼 */}
+          <IconButton
+            edge="end"
+            color="inherit"
+            aria-label="admin mode"
+            sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}
+            onClick={() => navigate('/admin/home')}
+            title="관리자 페이지"
+          >
+            <AdminPanelSettingsIcon />
+          </IconButton>
         </Box>
 
         {/* 2줄: 네비게이션 (가로 스크롤) */}

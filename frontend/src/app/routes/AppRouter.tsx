@@ -1,52 +1,107 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from '../../pages/home/HomePage';
+
+// 레이아웃
+import { MainLayout } from '../../layouts/main/MainLayout';
+import { AdminLayout } from '../../layouts/admin/AdminLayout';
+
+// 인증 페이지
 import LoginPage from '../../pages/auth/LoginPage/LoginPage';
 import RegisterPage from '../../pages/auth/RegisterPage/RegisterPage';
 import FindPasswordPage from '../../pages/auth/FindPasswordPage/FindPasswordPage';
+
+// 사용자 페이지 (기존 페이지들 - user 폴더로 이동됨)
+import BlogPage from '../../pages/user/blog/BlogPage/BlogPage';
+import BlogDetailPage from '../../pages/user/blog/BlogDetailPage/BlogDetailPage';
+import ShopPage from '../../pages/user/shop/ShopPage/ShopPage';
+import ShopDetailPage from '../../pages/user/shop/ShopDetailPage/ShopDetailPage';
+import EventPage from '../../pages/user/event/EventPage/EventPage';
+import DiscountEventDetailPage from '../../pages/user/event/EventDetailPage/DiscountEventDetailPage';
+import CouponEventDetailPage from '../../pages/user/event/EventDetailPage/CouponEventDetailPage';
+import PrizeEventDetailPage from '../../pages/user/event/EventDetailPage/PrizeEventDetailPage';
+import PromotionEventDetailPage from '../../pages/user/event/EventDetailPage/PromotionEventDetailPage';
+import FaqPage from '../../pages/user/faq/FaqPage/FaqPage';
+
+// 마이페이지
 import MyPage from '../../pages/user/MyPage';
-import BlogPage from '../../pages/blog/BlogPage/BlogPage';
-import BlogDetailPage from '../../pages/blog/BlogDetailPage/BlogDetailPage';
-import ShopPage from '../../pages/shop/ShopPage/ShopPage';
-import ShopDetailPage from '../../pages/shop/ShopDetailPage/ShopDetailPage';
-import { MainLayout } from '../../layouts/main/MainLayout';
-import EventPage from '../../pages/event/EventPage/EventPage';
-import DiscountEventDetailPage from '../../pages/event/EventDetailPage/DiscountEventDetailPage';
-import CouponEventDetailPage from '../../pages/event/EventDetailPage/CouponEventDetailPage';
-import PrizeEventDetailPage from '../../pages/event/EventDetailPage/PrizeEventDetailPage';
-import PromotionEventDetailPage from '../../pages/event/EventDetailPage/PromotionEventDetailPage';
-import DashboardPage from '../../pages/dashboard/DashboardPage/DashboardPage';
-import FaqPage from '../../pages/faq/FaqPage/FaqPage';
-import ReservationPage from '../../pages/reservation/ReservationPage/ReservationPage';
+
+// 관리자 페이지
+import AdminHomePage from '../../pages/admin/AdminHome/AdminHomePage';
+import AdminDashboardPage from '../../pages/admin/AdminDashboard/DashboardPage/DashboardPage';
+import BlogManagementPage from '../../pages/admin/BlogManagement/BlogManagementPage';
+import ShopManagementPage from '../../pages/admin/ShopManagement/ShopManagementPage';
+import EventManagementPage from '../../pages/admin/EventManagement/EventManagementPage';
+import FaqManagementPage from '../../pages/admin/FaqManagement/FaqManagementPage';
+import ReservationManagementPage from '../../pages/admin/ReservationManagement/ReservationPage/ReservationPage';
+
+// ScrollToTop 컴포넌트
 import { ScrollToTop } from '../../components/common/ScrollToTop';
 
-// 메인 라우터: 각 페이지와 레이아웃을 연결하는 곳
+/**
+ * 메인 라우터
+ * - 사용자 페이지: MainLayout 사용
+ * - 관리자 페이지: AdminLayout 사용 (/admin/* 경로)
+ */
 export const AppRouter: React.FC = () => {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/auth/login" element={<LoginPage />} />
-          <Route path="/auth/register" element={<RegisterPage />} />
-          <Route path="/find-password" element={<FindPasswordPage />} />
-          <Route path="/mypage" element={<MyPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:id" element={<BlogDetailPage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/shop/:id" element={<ShopDetailPage />} />
-          <Route path="/event" element={<EventPage />} />
-          <Route path='/event/discount' element={<DiscountEventDetailPage />}/>
-          <Route path='/event/coupon' element={<CouponEventDetailPage />}/>
-          <Route path='/event/prize' element={<PrizeEventDetailPage />}/>
-          <Route path='/event/promotion' element={<PromotionEventDetailPage />}/>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/faq" element={<FaqPage />} />
-          <Route path="/reservation" element={<ReservationPage />} />
-          <Route path="/mypage" element={<MyPage />} />
-        </Routes>
-      </MainLayout>
+      <Routes>
+        {/* 관리자 페이지 */}
+        <Route
+          path="/admin/*"
+          element={
+            <AdminLayout>
+              <Routes>
+                <Route path="home" element={<AdminHomePage />} />
+                <Route path="dashboard" element={<AdminDashboardPage />} />
+                <Route path="blog" element={<BlogManagementPage />} />
+                <Route path="shop" element={<ShopManagementPage />} />
+                <Route path="event" element={<EventManagementPage />} />
+                <Route path="faq" element={<FaqManagementPage />} />
+                <Route path="reservation" element={<ReservationManagementPage />} />
+              </Routes>
+            </AdminLayout>
+          }
+        />
+
+        {/* 사용자 페이지 */}
+        <Route
+          path="/*"
+          element={
+            <MainLayout>
+              <Routes>
+                {/* 인증 */}
+                <Route path="/auth/login" element={<LoginPage />} />
+                <Route path="/auth/register" element={<RegisterPage />} />
+                <Route path="/find-password" element={<FindPasswordPage />} />
+
+                {/* 마이페이지 */}
+                <Route path="/mypage" element={<MyPage />} />
+
+                {/* 블로그 */}
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/:id" element={<BlogDetailPage />} />
+
+                {/* 쇼핑몰 */}
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/shop/:id" element={<ShopDetailPage />} />
+
+                {/* 이벤트 */}
+                <Route path="/event" element={<EventPage />} />
+                <Route path="/event/discount" element={<DiscountEventDetailPage />} />
+                <Route path="/event/coupon" element={<CouponEventDetailPage />} />
+                <Route path="/event/prize" element={<PrizeEventDetailPage />} />
+                <Route path="/event/promotion" element={<PromotionEventDetailPage />} />
+
+                {/* FAQ */}
+                <Route path="/faq" element={<FaqPage />} />
+
+              </Routes>
+            </MainLayout>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 };
