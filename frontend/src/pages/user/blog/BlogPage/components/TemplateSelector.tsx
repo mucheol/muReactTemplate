@@ -2,8 +2,8 @@ import React from 'react';
 import { ButtonGroup, Button } from '@mui/material';
 
 interface TemplateSelectorProps {
-  selectedTemplate: 1 | 2 | 3;
-  onTemplateChange: (template: 1 | 2 | 3) => void;
+  selectedTemplate: 1 | 2;
+  onTemplateChange: (template: 1 | 2) => void;
 }
 
 /**
@@ -26,12 +26,6 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         onClick={() => onTemplateChange(2)}
       >
         2
-      </Button>
-      <Button
-        variant={selectedTemplate === 3 ? 'contained' : 'outlined'}
-        onClick={() => onTemplateChange(3)}
-      >
-        3
       </Button>
     </ButtonGroup>
   );

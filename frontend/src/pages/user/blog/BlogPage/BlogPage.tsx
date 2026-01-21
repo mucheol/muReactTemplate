@@ -20,15 +20,14 @@ import { BlogFilterBar } from './components/BlogFilterBar';
 import { TemplateSelector } from './components/TemplateSelector';
 import { BlogPage1 } from './templates/BlogPage1';
 import { BlogPage2 } from './templates/BlogPage2';
-import { BlogPage3 } from './templates/BlogPage3';
 
 const POSTS_PER_PAGE = 6;
 
 const BlogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // 템플릿 선택 상태 (1, 2, 3)
-  const [selectedTemplate, setSelectedTemplate] = useState<1 | 2 | 3>(1);
+  // 템플릿 선택 상태 (1, 2)
+  const [selectedTemplate, setSelectedTemplate] = useState<1 | 2>(1);
 
   // URL 파라미터에서 상태 읽기
   const currentPage = Number(searchParams.get('page')) || 1;
@@ -158,9 +157,6 @@ const BlogPage: React.FC = () => {
           )}
           {selectedTemplate === 2 && (
             <BlogPage2 posts={paginatedPosts} onClearFilter={handleClearFilter} />
-          )}
-          {selectedTemplate === 3 && (
-            <BlogPage3 posts={paginatedPosts} onClearFilter={handleClearFilter} />
           )}
 
           {/* 페이지네이션 */}

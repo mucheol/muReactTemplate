@@ -2,14 +2,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Chip,
-  Grid,
   Button,
-  CardActionArea,
+  Paper,
+  Stack,
+  Divider,
 } from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
 interface BlogPost {
   id: number;
@@ -20,15 +22,15 @@ interface BlogPost {
   views: number;
 }
 
-interface BlogPage2Props {
+interface BlogPage3Props {
   posts: BlogPost[];
   onClearFilter: () => void;
 }
 
 /**
- * 블로그 템플릿 2: 카드 그리드 스타일 (Pinterest 스타일)
+ * 블로그 템플릿 2: 카드 리스트 스타일 (모던)
  */
-export const BlogPage2: React.FC<BlogPage2Props> = ({ posts, onClearFilter }) => {
+export const BlogPage2: React.FC<BlogPage3Props> = ({ posts, onClearFilter }) => {
   const navigate = useNavigate();
 
   if (posts.length === 0) {
@@ -45,73 +47,91 @@ export const BlogPage2: React.FC<BlogPage2Props> = ({ posts, onClearFilter }) =>
   }
 
   return (
-    <Grid container spacing={3}>
-      {posts.map((post) => (
-        <Grid key={post.id} size={{ xs: 12, sm: 6, md: 4 }}>
-          <Card
+    <Stack spacing={0}>
+      {posts.map((post, index) => (
+        <React.Fragment key={post.id}>
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'transform 0.2s',
+              p: 3,
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+              borderRadius: 0,
+              borderLeft: '4px solid transparent',
               '&:hover': {
-                transform: 'translateY(-8px)',
-                boxShadow: 8,
+                bgcolor: 'grey.50',
+                borderLeftColor: 'primary.main',
+                pl: 4,
               },
             }}
+            onClick={() => navigate(`/blog/${post.id}`)}
           >
-            <CardActionArea
-              onClick={() => navigate(`/blog/${post.id}`)}
-              sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
-            >
-              {/* 정사각형 썸네일 */}
+            <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+              {/* 좌측: 작은 썸네일 */}
               <Box
                 sx={{
-                  width: '100%',
-                  paddingTop: '75%', // 4:3 비율
-                  position: 'relative',
+                  width: 120,
+                  height: 120,
+                  flexShrink: 0,
                   bgcolor: 'grey.200',
-                  overflow: 'hidden',
+                  borderRadius: 2,
+                  display: { xs: 'none', sm: 'flex' },
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Typography color="text.secondary">Image {post.id}</Typography>
-                </Box>
-
-                {/* 오버레이 카테고리 */}
-                <Chip
-                  label={post.category}
-                  size="small"
-                  color="secondary"
-                  sx={{
-                    position: 'absolute',
-                    top: 12,
-                    right: 12,
-                    bgcolor: 'rgba(255, 255, 255, 0.9)',
-                    fontWeight: 'bold',
-                  }}
-                />
+                <Typography variant="caption" color="text.secondary">
+                  {post.id}
+                </Typography>
               </Box>
 
-              <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
+              {/* 우측: 컨텐츠 */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                {/* 카테고리 + 날짜 */}
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1.5 }}>
+                  <Chip
+                    label={post.category}
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                  />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <CalendarTodayIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                    <Typography variant="caption" color="text.secondary">
+                      {post.date}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <RemoveRedEyeIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                    <Typography variant="caption" color="text.secondary">
+                      {post.views}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                {/* 제목 */}
                 <Typography
-                  variant="h6"
+                  variant="h5"
                   component="h3"
                   sx={{
                     mb: 1.5,
                     fontWeight: 600,
-                    lineHeight: 1.4,
+                    lineHeight: 1.3,
+                    '&:hover': {
+                      color: 'primary.main',
+                    },
+                  }}
+                >
+                  {post.title}
+                </Typography>
+
+                {/* 요약 */}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    mb: 2,
+                    lineHeight: 1.7,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     display: '-webkit-box',
@@ -119,48 +139,23 @@ export const BlogPage2: React.FC<BlogPage2Props> = ({ posts, onClearFilter }) =>
                     WebkitBoxOrient: 'vertical',
                   }}
                 >
-                  {post.title}
-                </Typography>
-
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    mb: 2,
-                    lineHeight: 1.6,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                  }}
-                >
                   {post.excerpt}
                 </Typography>
 
-                {/* 메타 정보 - 컴팩트하게 */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    pt: 1,
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                  }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    {post.date}
+                {/* 더보기 링크 */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'primary.main' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    자세히 보기
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    👁 {post.views}
-                  </Typography>
+                  <ArrowForwardIcon sx={{ fontSize: 16 }} />
                 </Box>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </Grid>
+              </Box>
+            </Box>
+          </Paper>
+
+          {index < posts.length - 1 && <Divider />}
+        </React.Fragment>
       ))}
-    </Grid>
+    </Stack>
   );
 };
