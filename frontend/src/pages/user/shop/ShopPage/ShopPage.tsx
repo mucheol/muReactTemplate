@@ -7,20 +7,14 @@ import {
   CardContent,
   Chip,
   Container,
-  Divider,
   Drawer,
   FormControl,
   IconButton,
   InputAdornment,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
   MenuItem,
   Pagination,
   Rating,
   Select,
-  Slider,
   Stack,
   TextField,
   Typography,
@@ -28,7 +22,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import CloseIcon from '@mui/icons-material/Close';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -46,6 +39,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 // @ts-ignore: CSS module has no type declarations
 import 'swiper/css';
+import { FilterSidebar } from './components/FilterSidebar';
 
 const PRODUCTS_PER_PAGE = 16;
 
@@ -192,93 +186,6 @@ const ShopPage = () => {
     });
   };
 
-  // 필터 사이드바 JSX
-  const filterSidebarContent = (
-    <Box sx={{ width: { xs: 280, md: 240 }, p: 2 }}>
-      {/* 모바일용 닫기 버튼 */}
-      <Box
-        sx={{
-          display: { xs: 'flex', md: 'none' },
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 2,
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          필터
-        </Typography>
-        <IconButton onClick={() => setFilterOpen(false)}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
-      {/* 카테고리 */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
-          카테고리
-        </Typography>
-        <List dense disablePadding>
-          {SHOP_CATEGORIES.map((category) => (
-            <ListItem key={category} disablePadding>
-              <ListItemButton
-                selected={selectedCategory === category}
-                onClick={() => handleCategoryClick(category)}
-                sx={{
-                  borderRadius: 1,
-                  mb: 0.5,
-                  '&.Mui-selected': {
-                    bgcolor: 'primary.light',
-                    color: 'primary.contrastText',
-                    '&:hover': {
-                      bgcolor: 'primary.main',
-                    },
-                  },
-                }}
-              >
-                <ListItemText primary={category} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-
-      <Divider sx={{ my: 2 }} />
-
-      {/* 가격 범위 */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
-          가격 범위
-        </Typography>
-        <Slider
-          value={tempPriceRange}
-          onChange={(_, newValue) => setTempPriceRange(newValue as number[])}
-          valueLabelDisplay="auto"
-          min={0}
-          max={300000}
-          step={1000}
-        />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-          <Typography variant="caption" color="text.secondary">
-            {formatPrice(tempPriceRange[0])}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {formatPrice(tempPriceRange[1])}
-          </Typography>
-        </Box>
-        <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={applyPriceFilter}>
-          적용
-        </Button>
-      </Box>
-
-      <Divider sx={{ my: 2 }} />
-
-      {/* 필터 초기화 */}
-      <Button variant="outlined" fullWidth onClick={handleClearFilter}>
-        필터 초기화
-      </Button>
-    </Box>
-  );
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 페이지 타이틀 */}
@@ -290,13 +197,29 @@ const ShopPage = () => {
         {/* 좌측 필터 사이드바 (데스크톱) */}
         <Box sx={{ display: { xs: 'none', md: 'block' }, flexShrink: 0 }}>
           <Box sx={{ position: 'sticky', top: 20 }}>
-            {filterSidebarContent}
+            <FilterSidebar
+              selectedCategory={selectedCategory}
+              onCategoryClick={handleCategoryClick}
+              tempPriceRange={tempPriceRange}
+              onPriceRangeChange={setTempPriceRange}
+              onApplyPriceFilter={applyPriceFilter}
+              onClearFilter={handleClearFilter}
+            />
           </Box>
         </Box>
 
         {/* 모바일 필터 드로어 */}
         <Drawer anchor="left" open={filterOpen} onClose={() => setFilterOpen(false)}>
-          {filterSidebarContent}
+          <FilterSidebar
+            selectedCategory={selectedCategory}
+            onCategoryClick={handleCategoryClick}
+            tempPriceRange={tempPriceRange}
+            onPriceRangeChange={setTempPriceRange}
+            onApplyPriceFilter={applyPriceFilter}
+            onClearFilter={handleClearFilter}
+            onClose={() => setFilterOpen(false)}
+            isMobile
+          />
         </Drawer>
 
         {/* 메인 콘텐츠 */}
