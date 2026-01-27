@@ -26,6 +26,10 @@ export interface Product {
   stock: number;
   isNew: boolean;
   isBest: boolean;
+  brand?: string;          // 브랜드명 (선택사항)
+  specifications?: Record<string, string>; // 상세 스펙
+  features?: string[];     // 주요 특징 배열
+  detailDescription?: string; // 상세 설명
 }
 
 /**

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -12,21 +12,73 @@ import {
   Rating,
   Stack,
   Typography,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
-import { getProductById, formatPrice, getDiscountRate, getBestProducts } from '../data/shopData';
+import { shopApi, type Product } from '../../../../modules/shop';
+import { formatPrice, getDiscountRate } from '../data/shopData';
 
 const ShopDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const product = getProductById(Number(id));
-  const bestProducts = getBestProducts().filter((p) => p.id !== Number(id)).slice(0, 4);
 
+  const [product, setProduct] = useState<Product | null>(null);
+  const [bestProducts, setBestProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+
+  // 상품 상세 정보 가져오기
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+        const response = await shopApi.getProduct(Number(id));
+        setProduct(response.data);
+
+        // 베스트 상품도 가져오기
+        const bestResponse = await shopApi.getProducts();
+        const best = bestResponse.data
+          .filter((p) => p.isBest && p.id !== Number(id))
+          .slice(0, 4);
+        setBestProducts(best);
+      } catch (error) {
+        console.error('상품 조회 실패:', error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  const handleQuantityChange = (delta: number) => {
+    if (!product) return;
+    const newQuantity = quantity + delta;
+    if (newQuantity >= 1 && newQuantity <= product.stock) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   if (!product) {
     return (
@@ -40,13 +92,6 @@ const ShopDetailPage: React.FC = () => {
   }
 
   const discountRate = getDiscountRate(product.price, product.originalPrice);
-
-  const handleQuantityChange = (delta: number) => {
-    const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= product.stock) {
-      setQuantity(newQuantity);
-    }
-  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -224,18 +269,114 @@ const ShopDetailPage: React.FC = () => {
         <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
           상품 상세 정보
         </Typography>
-        <Box
-          sx={{
-            height: 300,
-            bgcolor: 'grey.100',
-            borderRadius: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography color="text.secondary">상세 이미지 / 설명 영역</Typography>
-        </Box>
+
+        {/* 브랜드 정보 */}
+        {product.brand && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+              브랜드
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              {product.brand}
+            </Typography>
+          </Box>
+        )}
+
+        {/* 상품 스펙 */}
+        {product.specifications && Object.keys(product.specifications).length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              제품 사양
+            </Typography>
+            <TableContainer component={Paper} sx={{ boxShadow: 1 }}>
+              <Table>
+                <TableBody>
+                  {Object.entries(product.specifications).map(([key, value]) => (
+                    <TableRow key={key}>
+                      <TableCell
+                        sx={{
+                          width: '30%',
+                          fontWeight: 'bold',
+                          bgcolor: 'grey.50',
+                        }}
+                      >
+                        {key}
+                      </TableCell>
+                      <TableCell>{value}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
+
+        {/* 주요 특징 */}
+        {product.features && product.features.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              주요 특징
+            </Typography>
+            <Box
+              component="ul"
+              sx={{
+                pl: 3,
+                '& li': {
+                  mb: 1.5,
+                  color: 'text.secondary',
+                  lineHeight: 1.7,
+                },
+              }}
+            >
+              {product.features.map((feature, index) => (
+                <li key={index}>
+                  <Typography variant="body1">{feature}</Typography>
+                </li>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* 상세 설명 */}
+        {product.detailDescription && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              상세 설명
+            </Typography>
+            <Paper sx={{ p: 3, bgcolor: 'grey.50' }}>
+              <Box
+                sx={{
+                  '& h3': {
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold',
+                    mb: 2,
+                    mt: 0,
+                  },
+                  '& h4': {
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    mb: 1.5,
+                    mt: 3,
+                  },
+                  '& p': {
+                    mb: 2,
+                    lineHeight: 1.7,
+                    color: 'text.secondary',
+                  },
+                  '& ul': {
+                    pl: 3,
+                    mb: 2,
+                  },
+                  '& li': {
+                    mb: 1,
+                    color: 'text.secondary',
+                  },
+                }}
+                dangerouslySetInnerHTML={{ __html: product.detailDescription }}
+              />
+            </Paper>
+          </Box>
+        )}
       </Box>
 
       <Divider sx={{ my: 4 }} />
