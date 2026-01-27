@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -11,61 +11,13 @@ import {
   CardMedia,
   CardContent,
   Button,
+  CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
+import { eventApi, type EventItem, type EventStatusFilter } from '../../../../modules/event';
 
-type EventStatusFilter = 'all' | 'ongoing' | 'ended';
 type EventCategory = 'all' | 'discount' | 'coupon' | 'prize' | 'promotion';
-
-type EventItem = {
-  id: number;
-  title: string;
-  subtitle?: string;
-  thumbnailUrl?: string;
-  category: EventCategory;
-  startDate: string;
-  endDate: string;
-};
-
-const MOCK_EVENTS: EventItem[] = [
-  {
-    id: 1,
-    title: '봄맞이 할인 기획전',
-    subtitle: '최대 50% 할인',
-    thumbnailUrl: '',
-    category: 'discount',
-    startDate: dayjs().subtract(3, 'day').toISOString(),
-    endDate: dayjs().add(5, 'day').toISOString(),
-  },
-  {
-    id: 2,
-    title: '신규 가입 쿠폰 이벤트',
-    subtitle: '첫 구매 10,000원 할인',
-    thumbnailUrl: '',
-    category: 'coupon',
-    startDate: dayjs().subtract(10, 'day').toISOString(),
-    endDate: dayjs().add(1, 'day').toISOString(),
-  },
-  {
-    id: 3,
-    title: '럭키 박스 경품 추첨',
-    subtitle: '아이패드, 에어팟 등 푸짐한 선물',
-    thumbnailUrl: '',
-    category: 'prize',
-    startDate: dayjs().subtract(20, 'day').toISOString(),
-    endDate: dayjs().subtract(1, 'day').toISOString(),
-  },
-  {
-    id: 4,
-    title: '여름 시즌 MD 기획전',
-    subtitle: 'MD가 추천하는 여름 필수템 모음',
-    thumbnailUrl: '',
-    category: 'promotion',
-    startDate: dayjs().subtract(1, 'day').toISOString(),
-    endDate: dayjs().add(10, 'day').toISOString(),
-  },
-];
 
 const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
   { label: '전체', value: 'all' },
@@ -98,39 +50,48 @@ const getDDayLabel = (event: EventItem) => {
   return `D-${diff}`;
 };
 
-// 카테고리별 상세 페이지 경로 매핑
-const getEventDetailPath = (event: EventItem) => {
-  switch (event.category) {
-    case 'discount':
-      return '/event/discount';
-    case 'coupon':
-      return '/event/coupon';
-    case 'prize':
-      return '/event/prize';
-    case 'promotion':
-      return '/event/promotion';
-    default:
-      return '/event';
-  }
-};
 
 const EventPage: React.FC = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<EventStatusFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<EventCategory>('all');
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredEvents = useMemo(() => {
-    return MOCK_EVENTS.filter((event) => {
-      const status = getEventStatus(event);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const params: { status?: EventStatusFilter; category?: string } = {};
 
-      if (statusFilter === 'ongoing' && status === 'ended') return false;
-      if (statusFilter === 'ended' && status !== 'ended') return false;
+        if (statusFilter !== 'all') {
+          params.status = statusFilter;
+        }
 
-      if (categoryFilter !== 'all' && event.category !== categoryFilter) return false;
+        if (categoryFilter !== 'all') {
+          params.category = categoryFilter;
+        }
 
-      return true;
-    });
+        const response = await eventApi.getEvents(params);
+        setEvents(response.data);
+      } catch (error) {
+        console.error('이벤트 로딩 실패:', error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [statusFilter, categoryFilter]);
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -179,7 +140,7 @@ const EventPage: React.FC = () => {
       </Box>
 
       {/* 이벤트 카드 그리드 */}
-      {filteredEvents.length > 0 ? (
+      {events.length > 0 ? (
         <Box
           sx={{
             display: 'grid',
@@ -191,7 +152,7 @@ const EventPage: React.FC = () => {
             gap: 3,
           }}
         >
-          {filteredEvents.map((event) => {
+          {events.map((event: EventItem) => {
             const status = getEventStatus(event);
             const dday = getDDayLabel(event);
 
@@ -216,8 +177,8 @@ const EventPage: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                 }}
-                // 이벤트 성격(카테고리)에 맞는 상세 페이지로 이동
-                onClick={() => navigate(getEventDetailPath(event))}
+                // 이벤트 ID로 상세 페이지 이동
+                onClick={() => navigate(`/event/${event.id}`)}
               >
                 {/* 썸네일 배너 */}
                 <CardMedia

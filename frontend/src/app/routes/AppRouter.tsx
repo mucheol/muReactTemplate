@@ -16,10 +16,7 @@ import BlogDetailPage from '../../pages/user/blog/BlogDetailPage/BlogDetailPage'
 import ShopPage from '../../pages/user/shop/ShopPage/ShopPage';
 import ShopDetailPage from '../../pages/user/shop/ShopDetailPage/ShopDetailPage';
 import EventPage from '../../pages/user/event/EventPage/EventPage';
-import DiscountEventDetailPage from '../../pages/user/event/EventDetailPage/DiscountEventDetailPage';
-import CouponEventDetailPage from '../../pages/user/event/EventDetailPage/CouponEventDetailPage';
-import PrizeEventDetailPage from '../../pages/user/event/EventDetailPage/PrizeEventDetailPage';
-import PromotionEventDetailPage from '../../pages/user/event/EventDetailPage/PromotionEventDetailPage';
+import EventDetailPage from '../../pages/user/event/EventDetailPage/EventDetailPage';
 import FaqPage from '../../pages/user/faq/FaqPage/FaqPage';
 
 // 마이페이지
@@ -89,10 +86,7 @@ export const AppRouter: React.FC = () => {
 
                 {/* 이벤트 */}
                 <Route path="/event" element={<EventPage />} />
-                <Route path="/event/discount" element={<DiscountEventDetailPage />} />
-                <Route path="/event/coupon" element={<CouponEventDetailPage />} />
-                <Route path="/event/prize" element={<PrizeEventDetailPage />} />
-                <Route path="/event/promotion" element={<PromotionEventDetailPage />} />
+                <Route path="/event/:id" element={<EventDetailPage />} />
 
                 {/* FAQ */}
                 <Route path="/faq" element={<FaqPage />} />
