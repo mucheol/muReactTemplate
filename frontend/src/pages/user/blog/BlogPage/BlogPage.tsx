@@ -1,20 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Box,
   Container,
   Typography,
   Pagination,
+  CircularProgress,
 } from '@mui/material';
-import {
-  ALL_POSTS,
-  CATEGORIES,
-  TAGS,
-  getPopularPosts,
-  getPostsByCategory,
-  getPostsByTag,
-  searchPosts,
-} from '../data/blogData';
+import { blogApi, type BlogPost } from '../../../../modules/blog';
 import { FilterResultBar } from '../../../../components/common/FilterResultBar';
 import { BlogSidebar } from './components/BlogSidebar';
 import { TemplateSelector } from './components/TemplateSelector';
@@ -29,6 +22,13 @@ const BlogPage: React.FC = () => {
   // 템플릿 선택 상태 (1, 2)
   const [selectedTemplate, setSelectedTemplate] = useState<1 | 2>(1);
 
+  // 데이터 상태
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [popularPosts, setPopularPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
   // URL 파라미터에서 상태 읽기
   const currentPage = Number(searchParams.get('page')) || 1;
   const selectedCategory = searchParams.get('category') || '전체';
@@ -38,32 +38,48 @@ const BlogPage: React.FC = () => {
   // 검색 입력 상태
   const [searchInput, setSearchInput] = useState(searchQuery);
 
-  // 인기 포스트
-  const popularPosts = useMemo(() => getPopularPosts().slice(0, 3), []);
+  // 데이터 가져오기
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-  // 필터링된 포스트 목록
-  const filteredPosts = useMemo(() => {
-    let posts = ALL_POSTS;
+        // 포스트 목록 가져오기
+        const params: { category?: string; tag?: string; search?: string } = {};
+        if (searchQuery) {
+          params.search = searchQuery;
+        } else if (selectedTag) {
+          params.tag = selectedTag;
+        } else if (selectedCategory !== '전체') {
+          params.category = selectedCategory;
+        }
 
-    // 검색어 필터
-    if (searchQuery) {
-      posts = searchPosts(searchQuery);
-    }
-    // 태그 필터
-    else if (selectedTag) {
-      posts = getPostsByTag(selectedTag);
-    }
-    // 카테고리 필터
-    else if (selectedCategory !== '전체') {
-      posts = getPostsByCategory(selectedCategory);
-    }
+        const [postsResponse, popularResponse, categoriesResponse, tagsResponse] =
+          await Promise.all([
+            blogApi.getPosts(params),
+            blogApi.getPopularPosts(),
+            blogApi.getCategories(),
+            blogApi.getTags(),
+          ]);
 
-    return posts;
+        setPosts(postsResponse.data);
+        setPopularPosts(popularResponse.data.slice(0, 3));
+        setCategories(categoriesResponse.data);
+        setTags(tagsResponse.data);
+      } catch (error) {
+        console.error('데이터 로딩 실패:', error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [searchQuery, selectedTag, selectedCategory]);
 
   // 페이지네이션
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
-  const paginatedPosts = filteredPosts.slice(
+  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+  const paginatedPosts = posts.slice(
     (currentPage - 1) * POSTS_PER_PAGE,
     currentPage * POSTS_PER_PAGE
   );
@@ -126,6 +142,14 @@ const BlogPage: React.FC = () => {
 
   const filterLabel = getFilterLabel();
 
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 페이지 타이틀 + 템플릿 선택 버튼 */}
@@ -144,7 +168,7 @@ const BlogPage: React.FC = () => {
       {/* 현재 필터 표시 */}
       <FilterResultBar
         filterLabel={filterLabel}
-        resultCount={filteredPosts.length}
+        resultCount={posts.length}
         onClearFilter={handleClearFilter}
         countLabel="개의 포스트"
       />
@@ -181,10 +205,10 @@ const BlogPage: React.FC = () => {
             onSearchInputChange={setSearchInput}
             onSearch={handleSearch}
             onClearSearch={handleClearSearch}
-            categories={CATEGORIES}
+            categories={categories}
             selectedCategory={selectedCategory}
             onCategoryClick={handleCategoryClick}
-            tags={TAGS}
+            tags={tags}
             selectedTag={selectedTag}
             onTagClick={handleTagClick}
             popularPosts={popularPosts}

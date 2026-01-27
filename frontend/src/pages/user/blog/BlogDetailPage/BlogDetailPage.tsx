@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Avatar,
@@ -16,6 +16,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -29,13 +30,17 @@ import TwitterIcon from '@mui/icons-material/Twitter';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import { getPostById, getPopularPosts, CATEGORIES, TAGS } from '../data/blogData';
+import { blogApi, type BlogPost } from '../../../../modules/blog';
 
 const BlogDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const post = getPostById(Number(id));
-  const popularPosts = getPopularPosts().slice(0, 3);
+
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [popularPosts, setPopularPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
@@ -46,6 +51,55 @@ const BlogDetailPage: React.FC = () => {
     { id: 1, author: '김철수', date: '2024-01-15', content: '정말 유익한 글입니다. 감사합니다!' },
     { id: 2, author: '이영희', date: '2024-01-16', content: '이해하기 쉽게 설명해주셔서 감사합니다.' },
   ]);
+
+  // 이전/다음 포스트
+  const [prevPost, setPrevPost] = useState<BlogPost | null>(null);
+  const [nextPost, setNextPost] = useState<BlogPost | null>(null);
+
+  // 데이터 가져오기
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+
+        const [postResponse, popularResponse, categoriesResponse, tagsResponse] = await Promise.all([
+          blogApi.getPost(Number(id)),
+          blogApi.getPopularPosts(),
+          blogApi.getCategories(),
+          blogApi.getTags(),
+        ]);
+
+        setPost(postResponse.data);
+        setPopularPosts(popularResponse.data.slice(0, 3));
+        setCategories(categoriesResponse.data);
+        setTags(tagsResponse.data);
+
+        // 이전/다음 포스트
+        const currentId = Number(id);
+        try {
+          const prev = await blogApi.getPost(currentId - 1);
+          setPrevPost(prev.data);
+        } catch {
+          setPrevPost(null);
+        }
+        try {
+          const next = await blogApi.getPost(currentId + 1);
+          setNextPost(next.data);
+        } catch {
+          setNextPost(null);
+        }
+      } catch (error) {
+        console.error('포스트 로딩 실패:', error);
+        setPost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   // 목차 추출
   const tableOfContents = post
@@ -58,11 +112,6 @@ const BlogDetailPage: React.FC = () => {
           title: line.replace(/^#+\s*/, ''),
         }))
     : [];
-
-  // 이전/다음 포스트
-  const currentId = Number(id);
-  const prevPost = getPostById(currentId - 1);
-  const nextPost = getPostById(currentId + 1);
 
   const handleLike = () => {
     setLiked(!liked);
@@ -102,6 +151,14 @@ const BlogDetailPage: React.FC = () => {
       setComment('');
     }
   };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   if (!post) {
     return (
@@ -493,7 +550,7 @@ const BlogDetailPage: React.FC = () => {
                   카테고리
                 </Typography>
                 <Stack spacing={1}>
-                  {CATEGORIES.map((category) => (
+                  {categories.map((category: string) => (
                     <Box
                       key={category}
                       component={RouterLink}
@@ -575,7 +632,7 @@ const BlogDetailPage: React.FC = () => {
                   태그
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {TAGS.map((tag) => (
+                  {tags.map((tag: string) => (
                     <Chip
                       key={tag}
                       label={tag}
