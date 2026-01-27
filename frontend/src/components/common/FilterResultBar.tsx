@@ -1,20 +1,23 @@
-import React from 'react';
 import { Box, Chip, Typography } from '@mui/material';
 
-interface BlogFilterBarProps {
+interface FilterResultBarProps {
   filterLabel: string | null;
-  filteredCount: number;
+  resultCount: number;
   onClearFilter: () => void;
+  countLabel?: string;
 }
 
 /**
- * 블로그 필터 상태 표시 바
+ * 필터 결과 표시 바 (범용)
+ *
+ * 검색, 카테고리, 태그 등의 필터가 적용되었을 때 결과를 표시합니다.
  */
-export const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
+export const FilterResultBar = ({
   filterLabel,
-  filteredCount,
+  resultCount,
   onClearFilter,
-}) => {
+  countLabel = '개',
+}: FilterResultBarProps) => {
   if (!filterLabel) return null;
 
   return (
@@ -26,7 +29,7 @@ export const BlogFilterBar: React.FC<BlogFilterBarProps> = ({
         variant="outlined"
       />
       <Typography variant="body2" color="text.secondary">
-        {filteredCount}개의 포스트
+        {resultCount}{countLabel}
       </Typography>
     </Box>
   );

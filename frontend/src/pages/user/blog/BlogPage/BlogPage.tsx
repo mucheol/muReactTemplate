@@ -15,8 +15,8 @@ import {
   getPostsByTag,
   searchPosts,
 } from '../data/blogData';
+import { FilterResultBar } from '../../../../components/common/FilterResultBar';
 import { BlogSidebar } from './components/BlogSidebar';
-import { BlogFilterBar } from './components/BlogFilterBar';
 import { TemplateSelector } from './components/TemplateSelector';
 import { BlogPage1 } from './templates/BlogPage1';
 import { BlogPage2 } from './templates/BlogPage2';
@@ -102,11 +102,12 @@ const BlogPage: React.FC = () => {
     }
   };
 
-  // 검색어 입력 시 엔터키 처리
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
+  // 검색어 초기화
+  const handleClearSearch = () => {
+    setSearchInput('');
+    const params = new URLSearchParams(searchParams);
+    params.delete('q');
+    setSearchParams(params);
   };
 
   // 필터 초기화
@@ -141,10 +142,11 @@ const BlogPage: React.FC = () => {
       </Box>
 
       {/* 현재 필터 표시 */}
-      <BlogFilterBar
+      <FilterResultBar
         filterLabel={filterLabel}
-        filteredCount={filteredPosts.length}
+        resultCount={filteredPosts.length}
         onClearFilter={handleClearFilter}
+        countLabel="개의 포스트"
       />
 
       {/* 메인 레이아웃 */}
@@ -178,7 +180,7 @@ const BlogPage: React.FC = () => {
             searchInput={searchInput}
             onSearchInputChange={setSearchInput}
             onSearch={handleSearch}
-            onSearchKeyDown={handleSearchKeyDown}
+            onClearSearch={handleClearSearch}
             categories={CATEGORIES}
             selectedCategory={selectedCategory}
             onCategoryClick={handleCategoryClick}

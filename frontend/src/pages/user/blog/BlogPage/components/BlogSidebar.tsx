@@ -5,20 +5,17 @@ import {
   Card,
   CardContent,
   Typography,
-  Chip,
   Stack,
-  TextField,
-  InputAdornment,
-  IconButton,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
+import { SearchBar } from '../../../../../components/common/SearchBar';
+import { CategoryList } from '../../../../../components/common/CategoryList';
+import { TagCloud } from '../../../../../components/common/TagCloud';
 
 interface BlogSidebarProps {
   searchInput: string;
   onSearchInputChange: (value: string) => void;
   onSearch: () => void;
-  onSearchKeyDown: (e: React.KeyboardEvent) => void;
+  onClearSearch: () => void;
   categories: string[];
   selectedCategory: string;
   onCategoryClick: (category: string) => void;
@@ -41,7 +38,7 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
   searchInput,
   onSearchInputChange,
   onSearch,
-  onSearchKeyDown,
+  onClearSearch,
   categories,
   selectedCategory,
   onCategoryClick,
@@ -51,6 +48,11 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
   popularPosts,
   searchQuery,
 }) => {
+  // 카테고리 활성화 체크 (검색/태그 필터가 없을 때만)
+  const isCategoryActive = (category: string) => {
+    return selectedCategory === category && !searchQuery && !selectedTag;
+  };
+
   return (
     <Stack spacing={3}>
       {/* 검색 영역 */}
@@ -59,29 +61,13 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
           <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
             검색
           </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            placeholder="검색어를 입력하세요"
+          <SearchBar
             value={searchInput}
-            onChange={(e) => onSearchInputChange(e.target.value)}
-            onKeyDown={onSearchKeyDown}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {searchInput && (
-                      <IconButton size="small" onClick={() => onSearchInputChange('')}>
-                        <ClearIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                    <IconButton size="small" onClick={onSearch}>
-                      <SearchIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
+            onChange={onSearchInputChange}
+            onSearch={onSearch}
+            onClear={onClearSearch}
+            placeholder="검색어를 입력하세요"
+            sx={{ mb: 0 }}
           />
         </CardContent>
       </Card>
@@ -92,36 +78,12 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
           <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
             카테고리
           </Typography>
-          <Stack spacing={1}>
-            {categories.map((category) => (
-              <Box
-                key={category}
-                onClick={() => onCategoryClick(category)}
-                sx={{
-                  py: 1,
-                  px: 2,
-                  bgcolor:
-                    selectedCategory === category && !searchQuery && !selectedTag
-                      ? 'primary.light'
-                      : 'grey.50',
-                  color:
-                    selectedCategory === category && !searchQuery && !selectedTag
-                      ? 'primary.contrastText'
-                      : 'text.primary',
-                  borderRadius: 1,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor:
-                      selectedCategory === category && !searchQuery && !selectedTag
-                        ? 'primary.main'
-                        : 'grey.100',
-                  },
-                }}
-              >
-                <Typography variant="body2">{category}</Typography>
-              </Box>
-            ))}
-          </Stack>
+          <CategoryList
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategoryClick={onCategoryClick}
+            isActive={isCategoryActive}
+          />
         </CardContent>
       </Card>
 
@@ -181,19 +143,11 @@ export const BlogSidebar: React.FC<BlogSidebarProps> = ({
           <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
             태그
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {tags.map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                variant={selectedTag === tag ? 'filled' : 'outlined'}
-                color={selectedTag === tag ? 'primary' : 'default'}
-                onClick={() => onTagClick(tag)}
-                sx={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Box>
+          <TagCloud
+            tags={tags}
+            selectedTag={selectedTag}
+            onTagClick={onTagClick}
+          />
         </CardContent>
       </Card>
     </Stack>
