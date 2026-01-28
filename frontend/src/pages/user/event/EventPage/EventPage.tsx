@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { eventApi, type EventItem, type EventStatusFilter } from '../../../../modules/event';
 
-type EventCategory = 'all' | 'discount' | 'coupon' | 'prize' | 'promotion';
+type EventCategory = 'all' | 'discount' | 'coupon' | 'prize' | 'promotion' | 'attendance' | 'timesale' | 'quiz' | 'stamp';
 
 const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
   { label: '전체', value: 'all' },
@@ -25,6 +25,10 @@ const EVENT_CATEGORIES: { label: string; value: EventCategory }[] = [
   { label: '쿠폰', value: 'coupon' },
   { label: '경품', value: 'prize' },
   { label: '기획전', value: 'promotion' },
+  { label: '출석체크', value: 'attendance' },
+  { label: '타임세일', value: 'timesale' },
+  { label: '퀴즈', value: 'quiz' },
+  { label: '스탬프', value: 'stamp' },
 ];
 
 const getEventStatus = (event: EventItem): 'ongoing' | 'imminent' | 'ended' => {

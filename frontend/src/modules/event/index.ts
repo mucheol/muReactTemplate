@@ -4,8 +4,74 @@
 
 import apiClient from '../../utils/api/apiClient';
 
-export type EventCategory = 'discount' | 'coupon' | 'prize' | 'promotion';
+export type EventCategory = 'discount' | 'coupon' | 'prize' | 'promotion' | 'attendance' | 'timesale' | 'quiz' | 'stamp';
 export type EventStatusFilter = 'all' | 'ongoing' | 'ended';
+
+/**
+ * 경품 아이템
+ */
+export interface PrizeItem {
+  id: number;
+  name: string;
+  probability: number;
+  color: string;
+}
+
+/**
+ * 기획전 상품
+ */
+export interface PromotionProduct {
+  id: number;
+  name: string;
+  brand: string;
+  price: number;
+  originalPrice?: number;
+  imageUrl?: string;
+  category: string;
+}
+
+/**
+ * 기획전 섹션
+ */
+export interface PromotionSection {
+  id: string;
+  title: string;
+  products: PromotionProduct[];
+}
+
+/**
+ * 퀴즈 아이템
+ */
+export interface QuizQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
+/**
+ * 스탬프 위치
+ */
+export interface StampLocation {
+  id: string;
+  title: string;
+  description: string;
+  path: string;
+}
+
+/**
+ * 타임세일 상품
+ */
+export interface TimeSaleProduct {
+  id: number;
+  name: string;
+  brand: string;
+  price: number;
+  originalPrice: number;
+  stock: number;
+  maxStock: number;
+  imageUrl?: string;
+}
 
 /**
  * 이벤트 아이템 인터페이스
@@ -22,6 +88,13 @@ export interface EventItem {
   howToParticipate?: string[];
   benefits?: string[];
   notes?: string[];
+  prizeItems?: PrizeItem[];
+  prizeType?: 'wheel' | 'ladder';
+  promotionSections?: PromotionSection[];
+  quizQuestions?: QuizQuestion[];
+  stampLocations?: StampLocation[];
+  timeSaleProducts?: TimeSaleProduct[];
+  timeSaleEndTime?: string;
 }
 
 /**

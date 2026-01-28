@@ -10,15 +10,28 @@ import {
   Typography,
   CircularProgress,
   TextField,
+  Alert,
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { eventApi, type EventItem } from '../../../../modules/event';
+import { eventApi, type EventItem, type PrizeItem } from '../../../../modules/event';
+import PrizeWheel from '../../../../components/event/PrizeWheel/PrizeWheel';
+import LadderGame from '../../../../components/event/LadderGame/LadderGame';
+import PromotionProductList from '../../../../components/event/PromotionProductList/PromotionProductList';
+import AttendanceCheck from '../../../../components/event/AttendanceCheck/AttendanceCheck';
+import TimeSale from '../../../../components/event/TimeSale/TimeSale';
+import QuizEvent from '../../../../components/event/QuizEvent/QuizEvent';
+import StampRally from '../../../../components/event/StampRally/StampRally';
 
 const EventDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<EventItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [wonPrize, setWonPrize] = useState<PrizeItem | null>(null);
+
+  const handlePrizeWon = (prize: PrizeItem) => {
+    setWonPrize(prize);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -217,15 +230,79 @@ const EventDetailPage = () => {
         </Box>
       )}
 
-      {/* 참여 영역 */}
-      <Box sx={{ mb: 4 }}>
-        <Button variant="contained" color="primary" size="large" fullWidth>
-          {event.category === 'discount' && '할인 상품 바로 보러가기'}
-          {event.category === 'coupon' && '지금 쿠폰 사용하러 가기'}
-          {event.category === 'prize' && '경품 응모하기'}
-          {event.category === 'promotion' && '기획전 상품 보러가기'}
-        </Button>
-      </Box>
+      {/* 경품 추첨 영역 (경품 이벤트만) */}
+      {event.category === 'prize' && event.prizeItems && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+            경품 추첨하기
+          </Typography>
+
+          {wonPrize && wonPrize.name !== '꽝' && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              축하합니다! <strong>{wonPrize.name}</strong>에 당첨되셨습니다! 마이페이지에서 확인하세요.
+            </Alert>
+          )}
+
+          {event.prizeType === 'wheel' && (
+            <PrizeWheel prizes={event.prizeItems} onPrizeWon={handlePrizeWon} />
+          )}
+
+          {event.prizeType === 'ladder' && (
+            <LadderGame prizes={event.prizeItems} onPrizeWon={handlePrizeWon} />
+          )}
+        </Box>
+      )}
+
+      {/* 기획전 상품 목록 (기획전 이벤트만) */}
+      {event.category === 'promotion' && event.promotionSections && (
+        <Box sx={{ mb: 4 }}>
+          <PromotionProductList sections={event.promotionSections} />
+        </Box>
+      )}
+
+      {/* 출석체크 (출석 이벤트만) */}
+      {event.category === 'attendance' && (
+        <Box sx={{ mb: 4 }}>
+          <AttendanceCheck />
+        </Box>
+      )}
+
+      {/* 타임세일 (타임세일 이벤트만) */}
+      {event.category === 'timesale' && event.timeSaleProducts && event.timeSaleEndTime && (
+        <Box sx={{ mb: 4 }}>
+          <TimeSale products={event.timeSaleProducts} endTime={event.timeSaleEndTime} />
+        </Box>
+      )}
+
+      {/* 퀴즈 (퀴즈 이벤트만) */}
+      {event.category === 'quiz' && event.quizQuestions && (
+        <Box sx={{ mb: 4 }}>
+          <QuizEvent questions={event.quizQuestions} />
+        </Box>
+      )}
+
+      {/* 스탬프 투어 (스탬프 이벤트만) */}
+      {event.category === 'stamp' && event.stampLocations && (
+        <Box sx={{ mb: 4 }}>
+          <StampRally locations={event.stampLocations} />
+        </Box>
+      )}
+
+      {/* 참여 영역 (기본 이벤트만) */}
+      {event.category === 'discount' && (
+        <Box sx={{ mb: 4 }}>
+          <Button variant="contained" color="primary" size="large" fullWidth>
+            할인 상품 바로 보러가기
+          </Button>
+        </Box>
+      )}
+      {event.category === 'coupon' && (
+        <Box sx={{ mb: 4 }}>
+          <Button variant="contained" color="primary" size="large" fullWidth>
+            지금 쿠폰 사용하러 가기
+          </Button>
+        </Box>
+      )}
 
       <Divider sx={{ my: 4 }} />
 
