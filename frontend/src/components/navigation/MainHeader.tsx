@@ -19,6 +19,7 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 // 기본 헤더 컴포넌트 (모바일 우선)
 const NAV_ITEMS = [
+  { label: '홈', path: '/' },
   { label: '블로그', path: '/blog' },
   { label: '쇼핑몰', path: '/shop' },
   { label: '이벤트', path: '/event' },

@@ -11,6 +11,7 @@ import RegisterPage from '../../pages/auth/RegisterPage/RegisterPage';
 import FindPasswordPage from '../../pages/auth/FindPasswordPage/FindPasswordPage';
 
 // 사용자 페이지 (기존 페이지들 - user 폴더로 이동됨)
+import HomePage from '../../pages/user/home/HomePage/HomePage';
 import BlogPage from '../../pages/user/blog/BlogPage/BlogPage';
 import BlogDetailPage from '../../pages/user/blog/BlogDetailPage/BlogDetailPage';
 import ShopPage from '../../pages/user/shop/ShopPage/ShopPage';
@@ -67,6 +68,9 @@ export const AppRouter: React.FC = () => {
           element={
             <MainLayout>
               <Routes>
+                {/* 홈 */}
+                <Route path="/" element={<HomePage />} />
+
                 {/* 인증 */}
                 <Route path="/auth/login" element={<LoginPage />} />
                 <Route path="/auth/register" element={<RegisterPage />} />
