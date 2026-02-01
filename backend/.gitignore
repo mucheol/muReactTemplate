@@ -38,3 +38,10 @@ dist
 tmpclaude-*
 
 /src/generated/prisma
+
+# Uploads (for production use cloud storage)
+uploads/
+
+# SQLite database (will be created on deploy)
+prisma/*.db
+prisma/*.db-journal
