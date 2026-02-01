@@ -30,6 +30,8 @@ export interface Product {
   specifications?: Record<string, string>; // 상세 스펙
   features?: string[];     // 주요 특징 배열
   detailDescription?: string; // 상세 설명
+  imageUrl?: string;       // 상품 메인 이미지
+  images?: string[];       // 상품 추가 이미지들
 }
 
 /**
@@ -85,6 +87,8 @@ export interface ProductPayload {
   specifications?: Record<string, string>;
   features?: string[];
   detailDescription?: string;
+  imageUrl?: string;
+  images?: string[];
 }
 
 /**

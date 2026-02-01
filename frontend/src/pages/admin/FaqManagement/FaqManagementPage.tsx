@@ -21,8 +21,9 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { faqApi, type FaqItem } from '../../../modules/faq';
+import { faqApi, type FaqItem, type FaqPayload } from '../../../modules/faq';
 import { CATEGORY_LABELS } from '../../user/faq/FaqPage/constants';
+import FaqDialog from './components/FaqDialog';
 
 /**
  * FAQ 관리 페이지
@@ -32,6 +33,11 @@ const FaqManagementPage: React.FC = () => {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedFaq, setSelectedFaq] = useState<FaqItem | null>(null);
+
+  // 모든 태그 추출 (중복 제거)
+  const allTags = Array.from(new Set(faqs.flatMap((faq) => faq.tags || [])));
 
   const fetchFaqs = async () => {
     try {
@@ -52,8 +58,11 @@ const FaqManagementPage: React.FC = () => {
   }, []);
 
   const handleEdit = (id: number) => {
-    console.log('편집:', id);
-    // TODO: 편집 다이얼로그 또는 페이지 이동
+    const faq = faqs.find((f) => f.id === id);
+    if (faq) {
+      setSelectedFaq(faq);
+      setDialogOpen(true);
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -69,8 +78,20 @@ const FaqManagementPage: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    console.log('FAQ 추가');
-    // TODO: 작성 다이얼로그 또는 페이지 이동
+    setSelectedFaq(null);
+    setDialogOpen(true);
+  };
+
+  const handleSaveFaq = async (payload: FaqPayload) => {
+    if (selectedFaq) {
+      // 수정
+      const response = await faqApi.updateItem(selectedFaq.id, payload);
+      setFaqs((prev) => prev.map((faq) => (faq.id === selectedFaq.id ? response.data : faq)));
+    } else {
+      // 생성
+      const response = await faqApi.createItem(payload);
+      setFaqs((prev) => [response.data, ...prev]);
+    }
   };
 
   if (loading) {
@@ -182,6 +203,15 @@ const FaqManagementPage: React.FC = () => {
           </TableContainer>
         </CardContent>
       </Card>
+
+      {/* FAQ 생성/수정 다이얼로그 */}
+      <FaqDialog
+        open={dialogOpen}
+        item={selectedFaq}
+        allTags={allTags}
+        onClose={() => setDialogOpen(false)}
+        onSave={handleSaveFaq}
+      />
     </Box>
   );
 };

@@ -23,7 +23,9 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { shopApi, type Product } from '../../../modules/shop';
+import { shopApi, type Product, type ProductPayload } from '../../../modules/shop';
+import ProductDialog from './components/ProductDialog';
+import { SHOP_CATEGORIES } from '../../user/shop/data/shopData';
 
 /**
  * 쇼핑몰 관리 페이지
@@ -33,28 +35,38 @@ const ShopManagementPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // 모든 태그 추출 (중복 제거)
+  const allTags = Array.from(new Set(products.flatMap((p) => p.tags || [])));
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await shopApi.getProducts();
-        setProducts(response.data);
-      } catch (err) {
-        console.error('상품 조회 실패:', err);
-        setError('상품을 불러오는 중 오류가 발생했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
   }, []);
 
-  const handleEdit = (id: number) => {
-    console.log('편집:', id);
-    // TODO: 편집 다이얼로그 또는 페이지 이동
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await shopApi.getProducts();
+      setProducts(response.data);
+    } catch (err) {
+      console.error('상품 조회 실패:', err);
+      setError('상품을 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddNew = () => {
+    setSelectedProduct(null);
+    setDialogOpen(true);
+  };
+
+  const handleEdit = (product: Product) => {
+    setSelectedProduct(product);
+    setDialogOpen(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -73,9 +85,18 @@ const ShopManagementPage: React.FC = () => {
     window.open(`/shop/${id}`, '_blank');
   };
 
-  const handleAddNew = () => {
-    console.log('상품 추가');
-    // TODO: 작성 다이얼로그 또는 페이지 이동
+  const handleSaveProduct = async (payload: ProductPayload) => {
+    if (selectedProduct) {
+      // 수정
+      const response = await shopApi.updateProduct(selectedProduct.id, payload);
+      setProducts((prev) =>
+        prev.map((p) => (p.id === selectedProduct.id ? response.data : p)),
+      );
+    } else {
+      // 생성
+      const response = await shopApi.createProduct(payload);
+      setProducts((prev) => [response.data, ...prev]);
+    }
   };
 
   if (loading) {
@@ -186,7 +207,7 @@ const ShopManagementPage: React.FC = () => {
                           <IconButton size="small" onClick={() => handleView(product.id)} title="미리보기">
                             <VisibilityIcon fontSize="small" />
                           </IconButton>
-                          <IconButton size="small" onClick={() => handleEdit(product.id)} title="편집">
+                          <IconButton size="small" onClick={() => handleEdit(product)} title="편집">
                             <EditIcon fontSize="small" />
                           </IconButton>
                           <IconButton
@@ -207,6 +228,16 @@ const ShopManagementPage: React.FC = () => {
           </TableContainer>
         </CardContent>
       </Card>
+
+      {/* 상품 작성/수정 다이얼로그 */}
+      <ProductDialog
+        open={dialogOpen}
+        product={selectedProduct}
+        categories={SHOP_CATEGORIES}
+        allTags={allTags}
+        onClose={() => setDialogOpen(false)}
+        onSave={handleSaveProduct}
+      />
     </Box>
   );
 };

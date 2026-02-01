@@ -17,6 +17,8 @@ import {
   Alert,
 } from '@mui/material';
 import type { BlogPost, PostPayload } from '../../../../modules/blog';
+import RichTextEditor from '../../../../components/editor/RichTextEditor';
+import ImageUpload from '../../../../components/upload/ImageUpload';
 
 interface BlogPostDialogProps {
   open: boolean;
@@ -146,16 +148,13 @@ const BlogPostDialog: React.FC<BlogPostDialogProps> = ({
             placeholder="포스트 요약을 입력하세요 (2-3줄)"
           />
 
-          <TextField
-            label="내용"
-            fullWidth
-            required
-            multiline
-            rows={8}
-            value={formData.content}
-            onChange={(e) => handleChange('content', e.target.value)}
-            placeholder="포스트 본문 내용을 입력하세요"
-          />
+          <Box>
+            <RichTextEditor
+              content={formData.content}
+              onChange={(content) => handleChange('content', content)}
+              placeholder="포스트 본문 내용을 입력하세요..."
+            />
+          </Box>
 
           <Stack direction="row" spacing={2}>
             <FormControl fullWidth required>
@@ -217,28 +216,13 @@ const BlogPostDialog: React.FC<BlogPostDialogProps> = ({
             placeholder="작성자 이름 (선택사항)"
           />
 
-          <TextField
-            label="썸네일 URL"
-            fullWidth
+          <ImageUpload
             value={formData.thumbnail}
-            onChange={(e) => handleChange('thumbnail', e.target.value)}
-            placeholder="썸네일 이미지 URL (선택사항)"
+            onChange={(url) => handleChange('thumbnail', url)}
+            label="썸네일 이미지"
+            helperText="클릭하여 썸네일 이미지를 업로드하세요"
+            maxSizeMB={5}
           />
-
-          {formData.thumbnail && (
-            <Box>
-              <img
-                src={formData.thumbnail}
-                alt="썸네일 미리보기"
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '200px',
-                  objectFit: 'cover',
-                  borderRadius: '8px',
-                }}
-              />
-            </Box>
-          )}
         </Stack>
       </DialogContent>
       <DialogActions>

@@ -39,9 +39,15 @@ export const PrizeWheel: React.FC<PrizeWheelProps> = ({ prizes, onPrizeWon }) =>
 
     const prize = selectPrizeByProbability();
     const prizeIndex = prizes.findIndex((p) => p.id === prize.id);
-    const sliceAngle = 360 / prizes.length;
-    // 각 칸의 중앙을 가리키도록 sliceAngle의 절반을 더함
-    const targetAngle = prizeIndex * sliceAngle + sliceAngle / 2;
+
+    // 확률에 비례한 각도 계산
+    const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0);
+    let cumulativeAngle = 0;
+    for (let i = 0; i < prizeIndex; i++) {
+      cumulativeAngle += (prizes[i].probability / totalProbability) * 360;
+    }
+    const prizeAngle = (prizes[prizeIndex].probability / totalProbability) * 360;
+    const targetAngle = cumulativeAngle + prizeAngle / 2;
 
     // 여러 바퀴 돌고 목표 각도에 정확히 멈춤
     const spins = 5;
@@ -56,7 +62,8 @@ export const PrizeWheel: React.FC<PrizeWheelProps> = ({ prizes, onPrizeWon }) =>
     }, 4000);
   };
 
-  const sliceAngle = 360 / prizes.length;
+  // 전체 확률의 합
+  const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
@@ -94,8 +101,15 @@ export const PrizeWheel: React.FC<PrizeWheelProps> = ({ prizes, onPrizeWon }) =>
         >
           <svg width="100%" height="100%" viewBox="0 0 200 200">
             {prizes.map((prize, index) => {
-              const startAngle = (index * sliceAngle - 90) * (Math.PI / 180);
-              const endAngle = ((index + 1) * sliceAngle - 90) * (Math.PI / 180);
+              // 각 경품의 확률에 비례한 각도 계산
+              let cumulativeAngle = 0;
+              for (let i = 0; i < index; i++) {
+                cumulativeAngle += (prizes[i].probability / totalProbability) * 360;
+              }
+              const prizeAngle = (prize.probability / totalProbability) * 360;
+
+              const startAngle = (cumulativeAngle - 90) * (Math.PI / 180);
+              const endAngle = ((cumulativeAngle + prizeAngle) - 90) * (Math.PI / 180);
               const midAngle = (startAngle + endAngle) / 2;
 
               const x1 = 100 + 100 * Math.cos(startAngle);
@@ -106,10 +120,13 @@ export const PrizeWheel: React.FC<PrizeWheelProps> = ({ prizes, onPrizeWon }) =>
               const textX = 100 + 60 * Math.cos(midAngle);
               const textY = 100 + 60 * Math.sin(midAngle);
 
+              // 큰 호인지 작은 호인지 판단 (180도 이상이면 큰 호)
+              const largeArcFlag = prizeAngle > 180 ? 1 : 0;
+
               return (
                 <g key={prize.id}>
                   <path
-                    d={`M 100 100 L ${x1} ${y1} A 100 100 0 0 1 ${x2} ${y2} Z`}
+                    d={`M 100 100 L ${x1} ${y1} A 100 100 0 ${largeArcFlag} 1 ${x2} ${y2} Z`}
                     fill={prize.color}
                     stroke="#fff"
                     strokeWidth="2"
@@ -119,12 +136,27 @@ export const PrizeWheel: React.FC<PrizeWheelProps> = ({ prizes, onPrizeWon }) =>
                     y={textY}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fill="#333"
+                    fill="#fff"
                     fontSize="10"
                     fontWeight="bold"
-                    transform={`rotate(${index * sliceAngle}, ${textX}, ${textY})`}
+                    style={{
+                      textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                    }}
                   >
                     {prize.name}
+                  </text>
+                  <text
+                    x={textX}
+                    y={textY + 12}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize="8"
+                    style={{
+                      textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {prize.probability}%
                   </text>
                 </g>
               );

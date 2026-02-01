@@ -18,6 +18,7 @@ import ShopDetailPage from '../../pages/user/shop/ShopDetailPage/ShopDetailPage'
 import EventPage from '../../pages/user/event/EventPage/EventPage';
 import EventDetailPage from '../../pages/user/event/EventDetailPage/EventDetailPage';
 import FaqPage from '../../pages/user/faq/FaqPage/FaqPage';
+import ReservationPage from '../../pages/user/reservation/ReservationPage/ReservationPage';
 
 // 마이페이지
 import MyPage from '../../pages/user/MyPage';
@@ -88,6 +89,9 @@ export const AppRouter: React.FC = () => {
 
                 {/* FAQ */}
                 <Route path="/faq" element={<FaqPage />} />
+
+                {/* 예약 */}
+                <Route path="/reservation" element={<ReservationPage />} />
 
               </Routes>
             </MainLayout>

@@ -4,6 +4,7 @@ import dotenv = require('dotenv');
 import express = require('express');
 import cors = require('cors');
 import routes = require('./routes');
+import path = require('path');
 
 // 환경 변수 로드 (app.ts에서도 필요)
 dotenv.config();
@@ -24,6 +25,9 @@ console.log('[CORS] Final options:', JSON.stringify(corsOptions));
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// 정적 파일 제공 (업로드된 이미지)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

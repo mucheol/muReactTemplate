@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { label: '쇼핑몰', path: '/shop' },
   { label: '이벤트', path: '/event' },
   { label: 'FAQ', path: '/faq' },
+  { label: '예약', path: '/reservation' },
 ];
 
 const navButtonSx = {

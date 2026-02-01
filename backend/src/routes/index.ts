@@ -22,6 +22,8 @@ import shopRoutes = require('./shop.routes');  // 쇼핑몰 관련 API (상품 �
 import blogRoutes = require('./blog.routes');  // 블로그 관련 API (포스트 조회)
 import eventRoutes = require('./event.routes');  // 이벤트 관련 API (이벤트 조회)
 import faqRoutes = require('./faq.routes');  // FAQ 관련 API (FAQ 조회)
+import uploadRoutes = require('./upload.routes');  // 파일 업로드 API (이미지 업로드)
+import reservationRoutes = require('./reservation.routes');  // 예약 관련 API (예약 조회, 생성)
 
 /**
  * Express Router 생성
@@ -45,6 +47,8 @@ router.use('/shop', shopRoutes);  // /api/shop으로 시작하는 모든 요청
 router.use('/blog', blogRoutes);  // /api/blog로 시작하는 모든 요청
 router.use('/event', eventRoutes);  // /api/event로 시작하는 모든 요청
 router.use('/faq', faqRoutes);  // /api/faq로 시작하는 모든 요청
+router.use('/upload', uploadRoutes);  // /api/upload로 시작하는 모든 요청
+router.use('/reservation', reservationRoutes);  // /api/reservation로 시작하는 모든 요청
 
 /**
  * 라우터를 외부로 내보내기

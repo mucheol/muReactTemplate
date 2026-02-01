@@ -22,8 +22,9 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { eventApi, type EventItem, type EventCategory } from '../../../modules/event';
+import { eventApi, type EventItem, type EventCategory, type EventPayload } from '../../../modules/event';
 import dayjs from 'dayjs';
+import EventDialog from './components/EventDialog';
 
 const EVENT_CATEGORY_LABELS: Record<EventCategory, string> = {
   discount: '할인',
@@ -44,24 +45,26 @@ const EventManagementPage: React.FC = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await eventApi.getEvents();
-        setEvents(response.data);
-      } catch (err) {
-        console.error('이벤트 조회 실패:', err);
-        setError('이벤트를 불러오는 중 오류가 발생했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
   }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await eventApi.getEvents();
+      setEvents(response.data);
+    } catch (err) {
+      console.error('이벤트 조회 실패:', err);
+      setError('이벤트를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getEventStatus = (event: EventItem): 'ongoing' | 'imminent' | 'ended' => {
     const now = dayjs();
@@ -73,9 +76,14 @@ const EventManagementPage: React.FC = () => {
     return 'ongoing';
   };
 
-  const handleEdit = (id: number) => {
-    console.log('편집:', id);
-    // TODO: 편집 다이얼로그 또는 페이지 이동
+  const handleAddNew = () => {
+    setSelectedEvent(null);
+    setDialogOpen(true);
+  };
+
+  const handleEdit = (event: EventItem) => {
+    setSelectedEvent(event);
+    setDialogOpen(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -94,9 +102,16 @@ const EventManagementPage: React.FC = () => {
     window.open(`/event/${id}`, '_blank');
   };
 
-  const handleAddNew = () => {
-    console.log('이벤트 추가');
-    // TODO: 작성 다이얼로그 또는 페이지 이동
+  const handleSaveEvent = async (payload: EventPayload) => {
+    if (selectedEvent) {
+      // 수정
+      const response = await eventApi.updateEvent(selectedEvent.id, payload);
+      setEvents((prev) => prev.map((e) => (e.id === selectedEvent.id ? response.data : e)));
+    } else {
+      // 생성
+      const response = await eventApi.createEvent(payload);
+      setEvents((prev) => [response.data, ...prev]);
+    }
   };
 
   if (loading) {
@@ -195,7 +210,7 @@ const EventManagementPage: React.FC = () => {
                             <IconButton size="small" onClick={() => handleView(event.id)} title="미리보기">
                               <VisibilityIcon fontSize="small" />
                             </IconButton>
-                            <IconButton size="small" onClick={() => handleEdit(event.id)} title="편집">
+                            <IconButton size="small" onClick={() => handleEdit(event)} title="편집">
                               <EditIcon fontSize="small" />
                             </IconButton>
                             <IconButton
@@ -217,6 +232,14 @@ const EventManagementPage: React.FC = () => {
           </TableContainer>
         </CardContent>
       </Card>
+
+      {/* 이벤트 작성/수정 다이얼로그 */}
+      <EventDialog
+        open={dialogOpen}
+        event={selectedEvent}
+        onClose={() => setDialogOpen(false)}
+        onSave={handleSaveEvent}
+      />
     </Box>
   );
 };
