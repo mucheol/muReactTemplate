@@ -14,6 +14,7 @@ export interface BlogPost {
   content: string;
   category: string;
   tags: string[];
+  template: number; // 1, 2, 3
   date: string;
   views: number;
   thumbnail?: string;
@@ -51,6 +52,20 @@ export interface GetPostsParams {
   category?: string;
   tag?: string;
   search?: string;
+}
+
+/**
+ * 포스트 생성/수정 페이로드
+ */
+export interface PostPayload {
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  tags?: string[];
+  template?: number; // 1, 2, 3
+  author?: string;
+  thumbnail?: string;
 }
 
 /**
@@ -101,6 +116,33 @@ export const blogApi = {
    */
   getPopularPosts: async (): Promise<PostsResponse> => {
     const response = await apiClient.get<PostsResponse>('/blog/popular');
+    return response.data;
+  },
+
+  /**
+   * 포스트 생성
+   * POST /api/blog/posts
+   */
+  createPost: async (payload: PostPayload): Promise<PostResponse> => {
+    const response = await apiClient.post<PostResponse>('/blog/posts', payload);
+    return response.data;
+  },
+
+  /**
+   * 포스트 수정
+   * PUT /api/blog/posts/:id
+   */
+  updatePost: async (id: number, payload: Partial<PostPayload>): Promise<PostResponse> => {
+    const response = await apiClient.put<PostResponse>(`/blog/posts/${id}`, payload);
+    return response.data;
+  },
+
+  /**
+   * 포스트 삭제
+   * DELETE /api/blog/posts/:id
+   */
+  deletePost: async (id: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(`/blog/posts/${id}`);
     return response.data;
   },
 };

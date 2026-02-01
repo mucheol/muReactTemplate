@@ -23,8 +23,7 @@ import FaqPage from '../../pages/user/faq/FaqPage/FaqPage';
 import MyPage from '../../pages/user/MyPage';
 
 // 관리자 페이지
-import AdminHomePage from '../../pages/admin/AdminHome/AdminHomePage';
-import AdminDashboardPage from '../../pages/admin/AdminDashboard/DashboardPage/DashboardPage';
+import AdminDashboardPage from '../../pages/admin/AdminDashboard/AdminDashboard';
 import BlogManagementPage from '../../pages/admin/BlogManagement/BlogManagementPage';
 import ShopManagementPage from '../../pages/admin/ShopManagement/ShopManagementPage';
 import EventManagementPage from '../../pages/admin/EventManagement/EventManagementPage';
@@ -50,8 +49,7 @@ export const AppRouter: React.FC = () => {
           element={
             <AdminLayout>
               <Routes>
-                <Route path="home" element={<AdminHomePage />} />
-                <Route path="dashboard" element={<AdminDashboardPage />} />
+                <Route path="home" element={<AdminDashboardPage />} />
                 <Route path="blog" element={<BlogManagementPage />} />
                 <Route path="shop" element={<ShopManagementPage />} />
                 <Route path="event" element={<EventManagementPage />} />

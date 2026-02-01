@@ -125,6 +125,29 @@ export interface GetEventsParams {
 }
 
 /**
+ * 이벤트 생성/수정 페이로드
+ */
+export interface EventPayload {
+  title: string;
+  subtitle?: string;
+  thumbnailUrl?: string;
+  category: EventCategory;
+  startDate: string;
+  endDate: string;
+  content?: string;
+  howToParticipate?: string[];
+  benefits?: string[];
+  notes?: string[];
+  prizeItems?: PrizeItem[];
+  prizeType?: 'wheel' | 'ladder';
+  promotionSections?: PromotionSection[];
+  quizQuestions?: QuizQuestion[];
+  stampLocations?: StampLocation[];
+  timeSaleProducts?: TimeSaleProduct[];
+  timeSaleEndTime?: string;
+}
+
+/**
  * 이벤트 API 객체
  */
 export const eventApi = {
@@ -154,6 +177,33 @@ export const eventApi = {
    */
   getCategories: async (): Promise<CategoriesResponse> => {
     const response = await apiClient.get<CategoriesResponse>('/event/categories');
+    return response.data;
+  },
+
+  /**
+   * 이벤트 생성
+   * POST /api/event/events
+   */
+  createEvent: async (payload: EventPayload): Promise<EventResponse> => {
+    const response = await apiClient.post<EventResponse>('/event/events', payload);
+    return response.data;
+  },
+
+  /**
+   * 이벤트 수정
+   * PUT /api/event/events/:id
+   */
+  updateEvent: async (id: number, payload: Partial<EventPayload>): Promise<EventResponse> => {
+    const response = await apiClient.put<EventResponse>(`/event/events/${id}`, payload);
+    return response.data;
+  },
+
+  /**
+   * 이벤트 삭제
+   * DELETE /api/event/events/:id
+   */
+  deleteEvent: async (id: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(`/event/events/${id}`);
     return response.data;
   },
 };

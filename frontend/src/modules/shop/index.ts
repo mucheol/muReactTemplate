@@ -67,6 +67,27 @@ export interface GetProductsParams {
 }
 
 /**
+ * 상품 생성/수정 페이로드
+ */
+export interface ProductPayload {
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category: string;
+  tags?: string[];
+  rating?: number;
+  reviewCount?: number;
+  stock?: number;
+  isNew?: boolean;
+  isBest?: boolean;
+  brand?: string;
+  specifications?: Record<string, string>;
+  features?: string[];
+  detailDescription?: string;
+}
+
+/**
  * 쇼핑몰 API 객체
  *
  * 모든 쇼핑몰 관련 API 호출 함수를 하나의 객체로 묶어놓았습니다.
@@ -128,6 +149,33 @@ export const shopApi = {
      * 예: id = 5 → GET /shop/products/5
      */
     const response = await apiClient.get<ProductResponse>(`/shop/products/${id}`);
+    return response.data;
+  },
+
+  /**
+   * 상품 생성
+   * POST /api/shop/products
+   */
+  createProduct: async (payload: ProductPayload): Promise<ProductResponse> => {
+    const response = await apiClient.post<ProductResponse>('/shop/products', payload);
+    return response.data;
+  },
+
+  /**
+   * 상품 수정
+   * PUT /api/shop/products/:id
+   */
+  updateProduct: async (id: number, payload: Partial<ProductPayload>): Promise<ProductResponse> => {
+    const response = await apiClient.put<ProductResponse>(`/shop/products/${id}`, payload);
+    return response.data;
+  },
+
+  /**
+   * 상품 삭제
+   * DELETE /api/shop/products/:id
+   */
+  deleteProduct: async (id: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(`/shop/products/${id}`);
     return response.data;
   },
 };

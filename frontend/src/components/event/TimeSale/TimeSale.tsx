@@ -109,14 +109,18 @@ export const TimeSale: React.FC<TimeSaleProps> = ({ products, endTime }) => {
       </Box>
 
       {/* 상품 목록 */}
-      <Grid container spacing={3}>
-        {products.map((product) => {
-          const discount = calculateDiscount(product.price, product.originalPrice);
-          const stockPercentage = getStockPercentage(product.stock, product.maxStock);
-          const isLowStock = product.stock < product.maxStock * 0.2;
+      <Box sx={{
+        width: { xs: '80%', sm: '100%' },
+        mx: 'auto'
+      }}>
+        <Grid container spacing={3}>
+          {products.map((product) => {
+            const discount = calculateDiscount(product.price, product.originalPrice);
+            const stockPercentage = getStockPercentage(product.stock, product.maxStock);
+            const isLowStock = product.stock < product.maxStock * 0.2;
 
-          return (
-            <Grid item xs={12} sm={6} md={4} key={product.id}>
+            return (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={product.id}>
               <Card
                 sx={{
                   height: '100%',
@@ -260,10 +264,11 @@ export const TimeSale: React.FC<TimeSaleProps> = ({ products, endTime }) => {
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Box>
     </Box>
   );
 };

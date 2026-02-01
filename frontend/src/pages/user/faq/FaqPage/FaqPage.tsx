@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Typography, Paper, Divider } from '@mui/material';
+import { Box, Container, Typography, Paper, Divider, CircularProgress, Alert } from '@mui/material';
 import type { FaqCategory } from './types';
 import { CARD_STYLE } from './constants';
 import { useFaqFilter } from './hooks/useFaqFilter';
@@ -9,12 +9,24 @@ import { FaqAccordion } from './components/FaqAccordion';
 import { FaqContactInfo } from './components/FaqContactInfo';
 
 const FaqPage: React.FC = () => {
-  const { category, setCategory, search, setSearch, filteredFaqs, faqsByCategory } =
+  const { category, setCategory, search, setSearch, filteredFaqs, faqsByCategory, loading, error } =
     useFaqFilter();
 
   const handleChangeCategory = (_: React.SyntheticEvent, value: FaqCategory) => {
     setCategory(value);
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4 }}>
+        <Container maxWidth="lg">
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>
+            <CircularProgress />
+          </Box>
+        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4 }}>
@@ -32,6 +44,12 @@ const FaqPage: React.FC = () => {
             문의 채널을 이용해 주세요.
           </Typography>
         </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
 
         {/* 검색 + 카테고리 탭 */}
         <Paper elevation={0} sx={{ mb: 3, ...CARD_STYLE }}>

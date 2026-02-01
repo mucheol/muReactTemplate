@@ -25,6 +25,7 @@ export const StampRally: React.FC<StampRallyProps> = ({ locations }) => {
   const handleVisit = (locationId: string, path: string) => {
     if (visitedLocations.includes(locationId)) {
       // 이미 방문한 곳이면 해당 페이지로 이동
+      // eslint-disable-next-line react-hooks/immutability
       window.location.href = path;
     } else {
       // 방문하지 않은 곳이면 스탬프 찍고 이동
@@ -82,7 +83,7 @@ export const StampRally: React.FC<StampRallyProps> = ({ locations }) => {
           <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
             🎉 5,000원 쿠폰 지급 완료! 🎉
           </Typography>
-          <Typography variant="body2">마이페이지 > 쿠폰함에서 확인하실 수 있습니다.</Typography>
+          <Typography variant="body2">마이페이지 &gt; 쿠폰함에서 확인하실 수 있습니다.</Typography>
         </Paper>
       )}
 
@@ -92,7 +93,7 @@ export const StampRally: React.FC<StampRallyProps> = ({ locations }) => {
           const isVisited = visitedLocations.includes(location.id);
 
           return (
-            <Grid item xs={12} sm={6} md={4} key={location.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={location.id}>
               <Paper
                 elevation={isVisited ? 3 : 1}
                 sx={{

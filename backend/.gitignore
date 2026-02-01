@@ -31,3 +31,5 @@ dist
 
 # Claude temp files
 tmpclaude-*
+
+/src/generated/prisma

@@ -104,6 +104,24 @@ Copy `.env.example` to `.env` in each directory and adjust as needed.
 
 ## Important Technical Details
 
+### MUI v7 (Breaking Changes)
+This project uses MUI v7 (`@mui/material: ^7.x`). Key API changes from v5:
+
+**Grid Component:**
+```tsx
+// OLD (MUI v5) - DO NOT USE
+<Grid container spacing={2}>
+  <Grid item xs={12} sm={6} md={4}>
+
+// NEW (MUI v6+) - USE THIS
+<Grid container spacing={2}>
+  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+```
+
+- `item` prop is removed
+- `xs`, `sm`, `md`, `lg`, `xl` props are replaced with `size` prop
+- Use `size={12}` for fixed size or `size={{ xs: 12, sm: 6 }}` for responsive
+
 ### React Compiler
 This template has the experimental React Compiler enabled via `babel-plugin-react-compiler` in `vite.config.ts`. This may impact dev/build performance.
 

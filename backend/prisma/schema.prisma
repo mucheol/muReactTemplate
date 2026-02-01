@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 인증 ====================
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==================== 블로그 ====================
+model BlogPost {
+  id        Int      @id @default(autoincrement())
+  title     String
+  excerpt   String
+  content   String
+  category  String
+  tags      String   // JSON string으로 저장 ["tag1", "tag2"]
+  template  Int      @default(1) // 1, 2, 3 템플릿 번호
+  date      DateTime @default(now())
+  views     Int      @default(0)
+  thumbnail String?
+  author    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==================== 쇼핑몰 ====================
+model Product {
+  id                Int      @id @default(autoincrement())
+  name              String
+  description       String
+  price             Int
+  originalPrice     Int?
+  category          String
+  tags              String   // JSON string
+  rating            Float    @default(0)
+  reviewCount       Int      @default(0)
+  stock             Int      @default(0)
+  isNew             Boolean  @default(false)
+  isBest            Boolean  @default(false)
+  brand             String?
+  specifications    String?  // JSON string
+  features          String?  // JSON string
+  detailDescription String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ==================== 이벤트 ====================
+model Event {
+  id                Int      @id @default(autoincrement())
+  title             String
+  subtitle          String?
+  thumbnailUrl      String?
+  category          String   // discount, coupon, prize, promotion, attendance, timesale, quiz, stamp
+  startDate         DateTime
+  endDate           DateTime
+  content           String?
+  howToParticipate  String?  // JSON string
+  benefits          String?  // JSON string
+  notes             String?  // JSON string
+  prizeItems        String?  // JSON string
+  prizeType         String?  // wheel, ladder
+  promotionSections String?  // JSON string
+  quizQuestions     String?  // JSON string
+  stampLocations    String?  // JSON string
+  timeSaleProducts  String?  // JSON string
+  timeSaleEndTime   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ==================== FAQ ====================
+model Faq {
+  id        Int      @id @default(autoincrement())
+  category  String   // service, account, payment, etc
+  question  String
+  answer    String
+  tags      String?  // JSON string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

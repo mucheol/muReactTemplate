@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import ArticleIcon from '@mui/icons-material/Article';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import EventIcon from '@mui/icons-material/Event';
@@ -28,7 +27,6 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { label: '홈', path: '/admin/home', icon: <HomeIcon /> },
-  { label: '대시보드', path: '/admin/dashboard', icon: <DashboardIcon /> },
   { label: '블로그 관리', path: '/admin/blog', icon: <ArticleIcon /> },
   { label: '쇼핑몰 관리', path: '/admin/shop', icon: <ShoppingCartIcon /> },
   { label: '이벤트 관리', path: '/admin/event', icon: <EventIcon /> },
