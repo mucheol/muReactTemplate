@@ -8,7 +8,6 @@ import {
   Card,
   CardContent,
   CardMedia,
-  CardActions,
   Stack,
   Paper,
   Chip,
@@ -21,13 +20,13 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { blogApi, type BlogPost } from '../../../../modules/blog';
-import { eventApi, type Event } from '../../../../modules/event';
+import { eventApi, type EventItem } from '../../../../modules/event';
 import dayjs from 'dayjs';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
-  const [activeEvents, setActiveEvents] = useState<Event[]>([]);
+  const [activeEvents, setActiveEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -244,7 +243,7 @@ const HomePage: React.FC = () => {
                       <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                         <Chip label={post.category} size="small" />
                         <Typography variant="caption" color="text.secondary">
-                          {dayjs(post.createdAt).format('YYYY.MM.DD')}
+                          {dayjs(post.date).format('YYYY.MM.DD')}
                         </Typography>
                       </Stack>
                       <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
@@ -310,10 +309,10 @@ const HomePage: React.FC = () => {
                   onClick={() => navigate(`/event/${event.id}`)}
                 >
                   <Stack direction="row" spacing={2}>
-                    {event.thumbnail && (
+                    {event.thumbnailUrl && (
                       <Box
                         component="img"
-                        src={event.thumbnail}
+                        src={event.thumbnailUrl}
                         alt={event.title}
                         sx={{
                           width: 120,
@@ -347,7 +346,7 @@ const HomePage: React.FC = () => {
                           WebkitBoxOrient: 'vertical',
                         }}
                       >
-                        {event.description}
+                        {event.subtitle || event.content}
                       </Typography>
                     </Box>
                   </Stack>

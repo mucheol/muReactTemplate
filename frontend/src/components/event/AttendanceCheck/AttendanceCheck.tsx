@@ -98,7 +98,7 @@ export const AttendanceCheck: React.FC = () => {
             const isBonusDay = day % 7 === 0 || day === 30;
 
             return (
-              <Grid item xs={2.4} key={day}>
+              <Grid size={{ xs: 2.4 }} key={day}>
                 <Paper
                   elevation={status === 'today' ? 3 : 1}
                   sx={{
