@@ -112,7 +112,8 @@ const HomePage: React.FC = () => {
               fontSize: { xs: '1rem', md: '1.5rem' },
             }}
           >
-            React와 함께하는 모던 웹 경험
+            MUI 라이브러리를 사용하고 다양한 유형의 템플릿을 만들어 저장하기 위한 사이트입니다<br/>
+            페이지별 다양한 종류의 레이아웃과 기능을 추가해 나갈 예정입니다.
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
