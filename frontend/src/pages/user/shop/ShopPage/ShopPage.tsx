@@ -3,9 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Button,
-  CircularProgress,
   Container,
   Drawer,
+  Grid,
+  Skeleton,
   Stack,
   Typography,
   Alert,
@@ -229,15 +230,6 @@ const ShopPage = () => {
     navigate(`/shop/${productId}`);
   };
 
-  // 로딩 중일 때 표시
-  if (loading) {
-    return (
-      <Container sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
-
   // 에러 발생 시 표시
   if (error) {
     return (
@@ -269,15 +261,21 @@ const ShopPage = () => {
       />
 
       {/* 카테고리 탭 */}
-      <CategoryTabs
-        categories={SHOP_CATEGORIES}
-        selectedCategory={selectedCategory}
-        onCategoryClick={handleCategoryClick}
-        hasSearchQuery={!!searchQuery}
-      />
+      {loading ? (
+        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+          {[...Array(6)].map((_, i) => <Skeleton key={i} variant="rounded" width={60} height={32} />)}
+        </Stack>
+      ) : (
+        <CategoryTabs
+          categories={SHOP_CATEGORIES}
+          selectedCategory={selectedCategory}
+          onCategoryClick={handleCategoryClick}
+          hasSearchQuery={!!searchQuery}
+        />
+      )}
 
       {/* 베스트 상품 캐러셀 */}
-      <BestProductsCarousel products={bestProducts} onProductClick={handleProductClick} />
+      {!loading && <BestProductsCarousel products={bestProducts} onProductClick={handleProductClick} />}
 
       {/* 필터 + 정렬 */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -286,6 +284,7 @@ const ShopPage = () => {
           startIcon={<FilterListIcon />}
           onClick={() => setFilterOpen(true)}
           size="small"
+          disabled={loading}
         >
           필터
         </Button>
@@ -293,7 +292,7 @@ const ShopPage = () => {
       </Stack>
 
       {/* 검색 결과 표시 */}
-      {searchQuery && (
+      {!loading && searchQuery && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary">
             "{searchQuery}" 검색 결과 ({filteredProducts.length}개)
@@ -302,7 +301,17 @@ const ShopPage = () => {
       )}
 
       {/* 상품 목록 */}
-      {paginatedProducts.length === 0 ? (
+      {loading ? (
+        <Grid container spacing={2}>
+          {[...Array(8)].map((_, i) => (
+            <Grid key={i} size={{ xs: 6, sm: 4, md: 3 }}>
+              <Skeleton variant="rectangular" sx={{ paddingTop: '100%', borderRadius: 1, mb: 1 }} />
+              <Skeleton width="80%" height={20} sx={{ mb: 0.5 }} />
+              <Skeleton width="50%" height={20} />
+            </Grid>
+          ))}
+        </Grid>
+      ) : paginatedProducts.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography color="text.secondary">상품이 없습니다.</Typography>
         </Box>

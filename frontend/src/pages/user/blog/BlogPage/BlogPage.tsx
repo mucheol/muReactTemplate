@@ -5,7 +5,7 @@ import {
   Container,
   Typography,
   Pagination,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import { blogApi, type BlogPost } from '../../../../modules/blog';
 import { FilterResultBar } from '../../../../components/common/FilterResultBar';
@@ -142,14 +142,6 @@ const BlogPage: React.FC = () => {
 
   const filterLabel = getFilterLabel();
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 페이지 타이틀 + 템플릿 선택 버튼 */}
@@ -166,54 +158,76 @@ const BlogPage: React.FC = () => {
       </Box>
 
       {/* 현재 필터 표시 */}
-      <FilterResultBar
-        filterLabel={filterLabel}
-        resultCount={posts.length}
-        onClearFilter={handleClearFilter}
-        countLabel="개의 포스트"
-      />
+      {!loading && (
+        <FilterResultBar
+          filterLabel={filterLabel}
+          resultCount={posts.length}
+          onClearFilter={handleClearFilter}
+          countLabel="개의 포스트"
+        />
+      )}
 
       {/* 메인 레이아웃 */}
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
         {/* 메인 콘텐츠 영역 */}
         <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 66.67%' }, minWidth: 0 }}>
-          {/* 선택된 템플릿 렌더링 */}
-          {selectedTemplate === 1 && (
-            <BlogPage1 posts={paginatedPosts} onClearFilter={handleClearFilter} />
-          )}
-          {selectedTemplate === 2 && (
-            <BlogPage2 posts={paginatedPosts} onClearFilter={handleClearFilter} />
-          )}
-
-          {/* 페이지네이션 */}
-          {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-              />
+          {loading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {[...Array(4)].map((_, i) => (
+                <Box key={i}>
+                  <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 1, mb: 2 }} />
+                  <Skeleton width="60%" height={28} sx={{ mb: 1 }} />
+                  <Skeleton width="90%" />
+                  <Skeleton width="80%" />
+                </Box>
+              ))}
             </Box>
+          ) : (
+            <>
+              {selectedTemplate === 1 && (
+                <BlogPage1 posts={paginatedPosts} onClearFilter={handleClearFilter} />
+              )}
+              {selectedTemplate === 2 && (
+                <BlogPage2 posts={paginatedPosts} onClearFilter={handleClearFilter} />
+              )}
+              {totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    color="primary"
+                  />
+                </Box>
+              )}
+            </>
           )}
         </Box>
 
         {/* 사이드바 */}
         <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 33.33%' }, maxWidth: { md: 320 } }}>
-          <BlogSidebar
-            searchInput={searchInput}
-            onSearchInputChange={setSearchInput}
-            onSearch={handleSearch}
-            onClearSearch={handleClearSearch}
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onCategoryClick={handleCategoryClick}
-            tags={tags}
-            selectedTag={selectedTag}
-            onTagClick={handleTagClick}
-            popularPosts={popularPosts}
-            searchQuery={searchQuery}
-          />
+          {loading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
+              <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 1 }} />
+              <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1 }} />
+            </Box>
+          ) : (
+            <BlogSidebar
+              searchInput={searchInput}
+              onSearchInputChange={setSearchInput}
+              onSearch={handleSearch}
+              onClearSearch={handleClearSearch}
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategoryClick={handleCategoryClick}
+              tags={tags}
+              selectedTag={selectedTag}
+              onTagClick={handleTagClick}
+              popularPosts={popularPosts}
+              searchQuery={searchQuery}
+            />
+          )}
         </Box>
       </Box>
     </Container>

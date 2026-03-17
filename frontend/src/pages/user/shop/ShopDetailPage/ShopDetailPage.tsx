@@ -8,11 +8,12 @@ import {
   Chip,
   Container,
   Divider,
+  Grid,
   IconButton,
   Rating,
+  Skeleton,
   Stack,
   Typography,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -44,11 +45,12 @@ const ShopDetailPage: React.FC = () => {
 
       try {
         setLoading(true);
-        const response = await shopApi.getProduct(Number(id));
+        const [response, bestResponse] = await Promise.all([
+          shopApi.getProduct(Number(id)),
+          shopApi.getProducts(),
+        ]);
         setProduct(response.data);
 
-        // 베스트 상품도 가져오기
-        const bestResponse = await shopApi.getProducts();
         const best = bestResponse.data
           .filter((p) => p.isBest && p.id !== Number(id))
           .slice(0, 4);
@@ -74,8 +76,25 @@ const ShopDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Skeleton width={80} height={36} sx={{ mb: 3 }} />
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, mb: 6 }}>
+          <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 50%' } }}>
+            <Skeleton variant="rectangular" sx={{ paddingTop: '100%', borderRadius: 2 }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Skeleton width="60%" height={32} sx={{ mb: 1 }} />
+            <Skeleton width="90%" height={44} sx={{ mb: 2 }} />
+            <Skeleton width="40%" height={40} sx={{ mb: 3 }} />
+            <Skeleton variant="rectangular" height={1} sx={{ mb: 3 }} />
+            <Skeleton width="30%" height={24} sx={{ mb: 1 }} />
+            <Skeleton variant="rectangular" height={48} sx={{ mb: 2, borderRadius: 1 }} />
+            <Grid container spacing={2}>
+              <Grid size={6}><Skeleton variant="rectangular" height={48} sx={{ borderRadius: 1 }} /></Grid>
+              <Grid size={6}><Skeleton variant="rectangular" height={48} sx={{ borderRadius: 1 }} /></Grid>
+            </Grid>
+          </Box>
+        </Box>
       </Container>
     );
   }

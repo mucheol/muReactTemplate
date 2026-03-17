@@ -12,11 +12,11 @@ import {
   IconButton,
   Link,
   Paper,
+  Skeleton,
   Stack,
   TextField,
   Tooltip,
   Typography,
-  CircularProgress,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -154,8 +154,27 @@ const BlogDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Skeleton width={80} height={36} sx={{ mb: 3 }} />
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+          <Box sx={{ flex: { xs: '1 1 auto', md: '1 1 66.67%' }, minWidth: 0 }}>
+            <Skeleton width="30%" height={24} sx={{ mb: 1 }} />
+            <Skeleton width="85%" height={48} sx={{ mb: 1 }} />
+            <Skeleton width="70%" height={48} sx={{ mb: 3 }} />
+            <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+              <Skeleton variant="circular" width={48} height={48} />
+              <Box><Skeleton width={100} height={20} /><Skeleton width={160} height={16} /></Box>
+            </Stack>
+            <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2, mb: 4 }} />
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} width={`${75 + Math.random() * 20}%`} height={20} sx={{ mb: 1 }} />
+            ))}
+          </Box>
+          <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 33.33%' }, maxWidth: { md: 320 } }}>
+            <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1, mb: 2 }} />
+            <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 1 }} />
+          </Box>
+        </Box>
       </Container>
     );
   }

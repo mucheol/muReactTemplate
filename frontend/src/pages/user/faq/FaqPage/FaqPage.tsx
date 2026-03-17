@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Typography, Paper, Divider, CircularProgress, Alert } from '@mui/material';
+import { Box, Container, Typography, Paper, Divider, Skeleton, Alert } from '@mui/material';
 import type { FaqCategory } from './types';
 import { CARD_STYLE } from './constants';
 import { useFaqFilter } from './hooks/useFaqFilter';
@@ -15,18 +15,6 @@ const FaqPage: React.FC = () => {
   const handleChangeCategory = (_: React.SyntheticEvent, value: FaqCategory) => {
     setCategory(value);
   };
-
-  if (loading) {
-    return (
-      <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4 }}>
-        <Container maxWidth="lg">
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>
-            <CircularProgress />
-          </Box>
-        </Container>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 4 }}>
@@ -55,16 +43,30 @@ const FaqPage: React.FC = () => {
         <Paper elevation={0} sx={{ mb: 3, ...CARD_STYLE }}>
           <FaqSearch value={search} onChange={setSearch} />
           <Divider />
-          <FaqTabs
-            category={category}
-            onCategoryChange={handleChangeCategory}
-            categoryCounts={faqsByCategory}
-          />
+          {loading ? (
+            <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
+              {[...Array(5)].map((_, i) => <Skeleton key={i} variant="rounded" width={80} height={36} />)}
+            </Box>
+          ) : (
+            <FaqTabs
+              category={category}
+              onCategoryChange={handleChangeCategory}
+              categoryCounts={faqsByCategory}
+            />
+          )}
         </Paper>
 
         {/* FAQ 리스트 (아코디언) */}
         <Box sx={{ mb: 4 }}>
-          <FaqAccordion faqs={filteredFaqs} />
+          {loading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
+              ))}
+            </Box>
+          ) : (
+            <FaqAccordion faqs={filteredFaqs} />
+          )}
         </Box>
 
         {/* 추가 정보 섹션 */}

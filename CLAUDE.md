@@ -35,57 +35,81 @@ Run both servers concurrently in separate terminals:
 ### Frontend Architecture
 
 **Entry Point Flow:**
-`main.tsx` → `App.tsx` → `AppThemeProvider` → `AppRouter` → `MainLayout` + Pages
+`main.tsx` → `App.tsx` → `AppThemeProvider` → `AppRouter` → Layout + Pages
 
 **Key Architectural Patterns:**
 
 1. **Provider Pattern:** `App.tsx` wraps the entire app with `AppThemeProvider` for MUI theming
-2. **Layout Pattern:** `MainLayout` provides consistent Header/Footer across all pages via React Router
+2. **Dual Layout Pattern:** Two separate layouts — `MainLayout` (user-facing) and `AdminLayout` (admin panel), both wrapping their respective routes via React Router
 3. **Module-based Organization:** Features are organized in `modules/` (e.g., `modules/auth/`)
    - Each module exports types, API functions, and hooks
    - Example: `modules/auth/index.ts` contains `LoginPayload`, `RegisterPayload`, `authApi.login()`, `authApi.register()`
 
 **Directory Structure:**
 - `app/` - App-level configuration (providers, routing)
-- `components/` - Shared components organized by category (e.g., `navigation/`)
-- `layouts/` - Layout components (e.g., `MainLayout`)
-- `pages/` - Page components organized by feature (e.g., `auth/`, `user/`)
+- `components/` - Shared components organized by category (e.g., `navigation/`, `common/`, `event/`)
+- `layouts/` - Layout components (`main/MainLayout`, `admin/AdminLayout`)
+- `pages/` - Page components split into `user/` and `admin/` sub-trees
 - `modules/` - Feature modules with business logic, types, and API calls
 - `utils/` - Utilities (e.g., `api/apiClient.ts` for axios configuration)
 - `styles/` - Global styles and theme configuration
+- `types/` - Shared TypeScript types (e.g., `admin.types.ts`, `template.types.ts`)
 
 **State Management:**
 - Currently uses localStorage for auth state (see login/register pages)
 - No global state management library (Redux, Zustand, etc.) is configured
 
 **Routing:**
-All routes are centralized in `app/routes/AppRouter.tsx`:
+All routes are centralized in `app/routes/AppRouter.tsx` with two layout trees:
+
+*User routes* (under `MainLayout`):
 - `/` - HomePage
-- `/login` - LoginPage
-- `/register` - RegisterPage
-- `/find-password` - FindPasswordPage
-- `/mypage` - MyPage
+- `/auth/login`, `/auth/register`, `/find-password`
+- `/mypage`
+- `/blog`, `/blog/:id`
+- `/shop`, `/shop/:id`
+- `/event`, `/event/:id`
+- `/faq`
+- `/reservation`
+
+*Admin routes* (under `AdminLayout`, prefix `/admin/`):
+- `/admin/home` - AdminDashboard
+- `/admin/blog`, `/admin/shop`, `/admin/event`, `/admin/faq`, `/admin/reservation`
 
 ### Backend Architecture
 
 **Entry Point Flow:**
 `server.ts` (loads dotenv) → `app.ts` (Express config) → routes
 
+**Database:**
+- Prisma ORM with SQLite (`backend/prisma/schema.prisma`, db file at `backend/prisma/dev.db`)
+- Models: `User`, `BlogPost`, `Product`, `Event`, `Faq`, `Reservation`
+- Array/JSON fields (tags, specifications, etc.) are stored as JSON strings in SQLite
+- Prisma client singleton is at `backend/src/lib/prisma.ts`
+
+**Backend commands:**
+```bash
+cd backend
+npx prisma migrate dev   # Run migrations
+npx prisma studio        # Open Prisma Studio GUI
+npx prisma generate      # Regenerate client after schema changes
+```
+
 **Modular Routing:**
 - `app.ts` mounts all routes under `/api` prefix
-- `routes/index.ts` aggregates feature routes (e.g., `/auth` → `auth.routes.ts`)
-- Final endpoint structure: `/api/auth/login`, `/api/auth/register`
+- `routes/index.ts` aggregates feature routes
+- Final endpoint structure: `/api/{feature}/...`
 
-**Current Implementation:**
-- In-memory user storage (array-based, no database)
-- No password hashing (plaintext storage - marked for future improvement)
-- No JWT implementation (returns dummy token)
-- CORS configured to accept frontend origin via environment variable
-
-**Available Endpoints:**
-- `POST /api/auth/register` - User registration (email, password, name)
-- `POST /api/auth/login` - User login (email, password)
-- `GET /health` - Health check endpoint
+**Available API Routes:**
+- `/api/auth` - Login, register
+- `/api/shop` - Products CRUD
+- `/api/blog` - Blog posts CRUD
+- `/api/event` - Events CRUD
+- `/api/faq` - FAQ CRUD
+- `/api/reservation` - Reservations CRUD
+- `/api/upload` - File upload (images)
+- `/api/seed` - Temporary seed endpoint (to be removed)
+- `GET /health` - Health check
 
 ## Environment Configuration
 
@@ -99,6 +123,7 @@ Both frontend and backend use environment variables:
 - `PORT` - Server port (default: 4000)
 - `CORS_ORIGIN` - Allowed CORS origin (default: http://localhost:5173)
 - `NODE_ENV` - Node environment (development/production)
+- `DATABASE_URL` - Prisma SQLite path (e.g., `file:./prisma/dev.db`)
 
 Copy `.env.example` to `.env` in each directory and adjust as needed.
 
@@ -140,17 +165,12 @@ This template has the experimental React Compiler enabled via `babel-plugin-reac
 Current implementation (localStorage-based, no JWT verification):
 1. User submits login/register form
 2. Frontend calls `authApi.login()` or `authApi.register()` from `modules/auth/`
-3. Backend validates credentials (in-memory array lookup)
+3. Backend validates credentials against Prisma/SQLite `User` table
 4. On success, backend returns user data + dummy token
 5. Frontend stores user data in localStorage
-6. Header component (`MainHeader`) reads localStorage to show logged-in state
+6. Header component reads localStorage to show logged-in state
 
-**Security Note:** Current auth implementation is a prototype. Production use requires:
-- Password hashing (bcrypt)
-- Real JWT token generation/validation
-- Persistent database
-- Token refresh mechanism
-- HTTPS in production
+**Security Note:** Current auth implementation is a prototype — no password hashing, no real JWT.
 
 ## Adding New Features
 

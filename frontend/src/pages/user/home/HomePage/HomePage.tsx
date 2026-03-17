@@ -11,6 +11,7 @@ import {
   Stack,
   Paper,
   Chip,
+  Skeleton,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import StorefrontIcon from '@mui/icons-material/Storefront';
@@ -37,12 +38,13 @@ const HomePage: React.FC = () => {
     try {
       setLoading(true);
 
-      // 최근 블로그 포스트 3개 가져오기
-      const blogResponse = await blogApi.getPosts();
+      const [blogResponse, eventResponse] = await Promise.all([
+        blogApi.getPosts(),
+        eventApi.getEvents(),
+      ]);
+
       setRecentPosts(blogResponse.data.slice(0, 3));
 
-      // 진행 중인 이벤트 가져오기
-      const eventResponse = await eventApi.getEvents();
       const now = dayjs();
       const active = eventResponse.data.filter(
         (event) => dayjs(event.startDate).isBefore(now) && dayjs(event.endDate).isAfter(now)
@@ -194,169 +196,161 @@ const HomePage: React.FC = () => {
       </Container>
 
       {/* 최신 블로그 */}
-      {!loading && recentPosts.length > 0 && (
-        <Box sx={{ bgcolor: 'white', py: 8 }}>
-          <Container maxWidth="lg">
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 4 }}
-            >
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                  최신 블로그
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  새로운 소식과 유익한 정보
-                </Typography>
-              </Box>
-              <Button
-                endIcon={<ArrowForwardIcon />}
-                onClick={() => navigate('/blog')}
-              >
-                더보기
-              </Button>
-            </Stack>
-
-            <Grid container spacing={3}>
-              {recentPosts.map((post) => (
-                <Grid key={post.id} size={{ xs: 12, md: 4 }}>
-                  <Card
-                    sx={{
-                      height: '100%',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s',
-                      '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 },
-                    }}
-                    onClick={() => navigate(`/blog/${post.id}`)}
-                  >
-                    {post.thumbnail && (
-                      <CardMedia
-                        component="img"
-                        height="200"
-                        image={post.thumbnail}
-                        alt={post.title}
-                        sx={{ objectFit: 'cover' }}
-                      />
-                    )}
-                    <CardContent>
-                      <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                        <Chip label={post.category} size="small" />
-                        <Typography variant="caption" color="text.secondary">
-                          {dayjs(post.date).format('YYYY.MM.DD')}
-                        </Typography>
-                      </Stack>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                        {post.title}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                      >
-                        {post.excerpt}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Container>
-        </Box>
-      )}
-
-      {/* 진행 중인 이벤트 */}
-      {!loading && activeEvents.length > 0 && (
-        <Container maxWidth="lg" sx={{ py: 8 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 4 }}
-          >
+      <Box sx={{ bgcolor: 'white', py: 8 }}>
+        <Container maxWidth="lg">
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-                진행 중인 이벤트
+                최신 블로그
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                놓치지 마세요!
+                새로운 소식과 유익한 정보
               </Typography>
             </Box>
-            <Button
-              endIcon={<ArrowForwardIcon />}
-              onClick={() => navigate('/event')}
-            >
-              전체보기
+            <Button endIcon={<ArrowForwardIcon />} onClick={() => navigate('/blog')}>
+              더보기
             </Button>
           </Stack>
 
           <Grid container spacing={3}>
-            {activeEvents.map((event) => (
-              <Grid key={event.id} size={{ xs: 12, md: 6 }}>
-                <Paper
-                  sx={{
-                    p: 3,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    '&:hover': { boxShadow: 4 },
-                  }}
-                  onClick={() => navigate(`/event/${event.id}`)}
-                >
-                  <Stack direction="row" spacing={2}>
-                    {event.thumbnailUrl && (
-                      <Box
-                        component="img"
-                        src={event.thumbnailUrl}
-                        alt={event.title}
-                        sx={{
-                          width: 120,
-                          height: 120,
-                          objectFit: 'cover',
-                          borderRadius: 2,
-                        }}
-                      />
-                    )}
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Chip
-                        label="진행중"
-                        size="small"
-                        color="success"
-                        sx={{ mb: 1 }}
-                      />
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                        {event.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {dayjs(event.startDate).format('YYYY.MM.DD')} ~{' '}
-                        {dayjs(event.endDate).format('YYYY.MM.DD')}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                      >
-                        {event.subtitle || event.content}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Paper>
-              </Grid>
-            ))}
+            {loading
+              ? [...Array(3)].map((_, i) => (
+                  <Grid key={i} size={{ xs: 12, md: 4 }}>
+                    <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1, mb: 1 }} />
+                    <Skeleton width="40%" height={24} sx={{ mb: 1 }} />
+                    <Skeleton width="90%" height={20} sx={{ mb: 0.5 }} />
+                    <Skeleton width="75%" height={20} />
+                  </Grid>
+                ))
+              : recentPosts.map((post) => (
+                  <Grid key={post.id} size={{ xs: 12, md: 4 }}>
+                    <Card
+                      sx={{
+                        height: '100%',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s',
+                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 3 },
+                      }}
+                      onClick={() => navigate(`/blog/${post.id}`)}
+                    >
+                      {post.thumbnail && (
+                        <CardMedia
+                          component="img"
+                          height="200"
+                          image={post.thumbnail}
+                          alt={post.title}
+                          sx={{ objectFit: 'cover' }}
+                          loading="lazy"
+                        />
+                      )}
+                      <CardContent>
+                        <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                          <Chip label={post.category} size="small" />
+                          <Typography variant="caption" color="text.secondary">
+                            {dayjs(post.date).format('YYYY.MM.DD')}
+                          </Typography>
+                        </Stack>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                          {post.title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                          }}
+                        >
+                          {post.excerpt}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
           </Grid>
         </Container>
-      )}
+      </Box>
+
+      {/* 진행 중인 이벤트 */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 4 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+              진행 중인 이벤트
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              놓치지 마세요!
+            </Typography>
+          </Box>
+          <Button endIcon={<ArrowForwardIcon />} onClick={() => navigate('/event')}>
+            전체보기
+          </Button>
+        </Stack>
+
+        <Grid container spacing={3}>
+          {loading
+            ? [...Array(2)].map((_, i) => (
+                <Grid key={i} size={{ xs: 12, md: 6 }}>
+                  <Paper sx={{ p: 3 }}>
+                    <Stack direction="row" spacing={2}>
+                      <Skeleton variant="rectangular" width={120} height={120} sx={{ borderRadius: 2, flexShrink: 0 }} />
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Skeleton width="30%" height={24} sx={{ mb: 1 }} />
+                        <Skeleton width="80%" height={28} sx={{ mb: 1 }} />
+                        <Skeleton width="60%" height={20} sx={{ mb: 1 }} />
+                        <Skeleton width="90%" height={20} />
+                      </Box>
+                    </Stack>
+                  </Paper>
+                </Grid>
+              ))
+            : activeEvents.map((event) => (
+                <Grid key={event.id} size={{ xs: 12, md: 6 }}>
+                  <Paper
+                    sx={{ p: 3, cursor: 'pointer', transition: 'all 0.2s', '&:hover': { boxShadow: 4 } }}
+                    onClick={() => navigate(`/event/${event.id}`)}
+                  >
+                    <Stack direction="row" spacing={2}>
+                      {event.thumbnailUrl && (
+                        <Box
+                          component="img"
+                          src={event.thumbnailUrl}
+                          alt={event.title}
+                          loading="lazy"
+                          sx={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 2 }}
+                        />
+                      )}
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Chip label="진행중" size="small" color="success" sx={{ mb: 1 }} />
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                          {event.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                          {dayjs(event.startDate).format('YYYY.MM.DD')} ~{' '}
+                          {dayjs(event.endDate).format('YYYY.MM.DD')}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                          }}
+                        >
+                          {event.subtitle || event.content}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Paper>
+                </Grid>
+              ))}
+        </Grid>
+      </Container>
 
       {/* FAQ 배너 */}
       <Box sx={{ bgcolor: 'primary.main', color: 'white', py: 6 }}>

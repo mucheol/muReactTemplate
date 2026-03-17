@@ -11,7 +11,7 @@ import {
   CardMedia,
   CardContent,
   Button,
-  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -89,14 +89,6 @@ const EventPage: React.FC = () => {
     fetchData();
   }, [statusFilter, categoryFilter]);
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 헤더 영역 */}
@@ -144,7 +136,24 @@ const EventPage: React.FC = () => {
       </Box>
 
       {/* 이벤트 카드 그리드 */}
-      {events.length > 0 ? (
+      {loading ? (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            gap: 3,
+          }}
+        >
+          {[...Array(6)].map((_, i) => (
+            <Box key={i}>
+              <Skeleton variant="rectangular" sx={{ paddingTop: '40%', borderRadius: 1, mb: 1 }} />
+              <Skeleton width="30%" height={22} sx={{ mb: 0.5 }} />
+              <Skeleton width="80%" height={24} sx={{ mb: 0.5 }} />
+              <Skeleton width="50%" height={18} />
+            </Box>
+          ))}
+        </Box>
+      ) : events.length > 0 ? (
         <Box
           sx={{
             display: 'grid',
