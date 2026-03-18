@@ -16,6 +16,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { routePreloadMap } from '../../app/routes/lazyPreload';
 
 // 기본 헤더 컴포넌트 (모바일 우선)
 const NAV_ITEMS = [
@@ -170,6 +171,7 @@ export const MainHeader: React.FC = () => {
                   sx={navButtonSx}
                   component={RouterLink}
                   to={item.path}
+                  onMouseEnter={() => routePreloadMap[item.path]?.()}
                 >
                   {item.label}
                 </Button>
@@ -256,6 +258,7 @@ export const MainHeader: React.FC = () => {
               <ListItemButton
                 key={item.path}
                 onClick={() => handleNavClick(item.path)}
+                onMouseEnter={() => routePreloadMap[item.path]?.()}
               >
                 <ListItemText primary={item.label} />
               </ListItemButton>

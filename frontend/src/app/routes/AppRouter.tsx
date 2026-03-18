@@ -9,30 +9,27 @@ import { AdminLayout } from '../../layouts/admin/AdminLayout';
 // ScrollToTop 컴포넌트
 import { ScrollToTop } from '../../components/common/ScrollToTop';
 
-// 인증 페이지
-const LoginPage = React.lazy(() => import('../../pages/auth/LoginPage/LoginPage'));
-const RegisterPage = React.lazy(() => import('../../pages/auth/RegisterPage/RegisterPage'));
-const FindPasswordPage = React.lazy(() => import('../../pages/auth/FindPasswordPage/FindPasswordPage'));
-
-// 사용자 페이지
-const HomePage = React.lazy(() => import('../../pages/user/home/HomePage/HomePage'));
-const BlogPage = React.lazy(() => import('../../pages/user/blog/BlogPage/BlogPage'));
-const BlogDetailPage = React.lazy(() => import('../../pages/user/blog/BlogDetailPage/BlogDetailPage'));
-const ShopPage = React.lazy(() => import('../../pages/user/shop/ShopPage/ShopPage'));
-const ShopDetailPage = React.lazy(() => import('../../pages/user/shop/ShopDetailPage/ShopDetailPage'));
-const EventPage = React.lazy(() => import('../../pages/user/event/EventPage/EventPage'));
-const EventDetailPage = React.lazy(() => import('../../pages/user/event/EventDetailPage/EventDetailPage'));
-const FaqPage = React.lazy(() => import('../../pages/user/faq/FaqPage/FaqPage'));
-const ReservationPage = React.lazy(() => import('../../pages/user/reservation/ReservationPage/ReservationPage'));
-const MyPage = React.lazy(() => import('../../pages/user/MyPage'));
-
-// 관리자 페이지
-const AdminDashboardPage = React.lazy(() => import('../../pages/admin/AdminDashboard/AdminDashboard'));
-const BlogManagementPage = React.lazy(() => import('../../pages/admin/BlogManagement/BlogManagementPage'));
-const ShopManagementPage = React.lazy(() => import('../../pages/admin/ShopManagement/ShopManagementPage'));
-const EventManagementPage = React.lazy(() => import('../../pages/admin/EventManagement/EventManagementPage'));
-const FaqManagementPage = React.lazy(() => import('../../pages/admin/FaqManagement/FaqManagementPage'));
-const ReservationManagementPage = React.lazy(() => import('../../pages/admin/ReservationManagement/ReservationPage/ReservationPage'));
+import {
+  LoginPage,
+  RegisterPage,
+  FindPasswordPage,
+  HomePage,
+  BlogPage,
+  BlogDetailPage,
+  ShopPage,
+  ShopDetailPage,
+  EventPage,
+  EventDetailPage,
+  FaqPage,
+  ReservationPage,
+  MyPage,
+  AdminDashboardPage,
+  BlogManagementPage,
+  ShopManagementPage,
+  EventManagementPage,
+  FaqManagementPage,
+  ReservationManagementPage,
+} from './lazyPreload';
 
 const PageFallback = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
