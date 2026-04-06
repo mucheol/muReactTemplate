@@ -36,30 +36,39 @@ const ShopDetailPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [bestProducts, setBestProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [relatedLoading, setRelatedLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
-  // 상품 상세 정보 가져오기
+  // 상품 상세 정보 가져오기 - 메인 상품 먼저, 추천 상품은 백그라운드
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
 
-      try {
-        setLoading(true);
-        const [response, bestResponse] = await Promise.all([
-          shopApi.getProduct(Number(id)),
-          shopApi.getProducts(),
-        ]);
-        setProduct(response.data);
+      setLoading(true);
+      setRelatedLoading(true);
 
-        const best = bestResponse.data
-          .filter((p) => p.isBest && p.id !== Number(id))
-          .slice(0, 4);
-        setBestProducts(best);
+      // 1단계: 메인 상품 먼저 로드
+      try {
+        const response = await shopApi.getProduct(Number(id));
+        setProduct(response.data);
       } catch (error) {
         console.error('상품 조회 실패:', error);
         setProduct(null);
       } finally {
         setLoading(false);
+      }
+
+      // 2단계: 추천 상품 백그라운드 로드
+      try {
+        const bestResponse = await shopApi.getProducts();
+        const best = bestResponse.data
+          .filter((p) => p.isBest && p.id !== Number(id))
+          .slice(0, 4);
+        setBestProducts(best);
+      } catch {
+        setBestProducts([]);
+      } finally {
+        setRelatedLoading(false);
       }
     };
 
@@ -415,7 +424,15 @@ const ShopDetailPage: React.FC = () => {
             gap: 2,
           }}
         >
-          {bestProducts.map((p) => (
+          {relatedLoading
+            ? [...Array(4)].map((_, i) => (
+                <Box key={i}>
+                  <Skeleton variant="rectangular" sx={{ paddingTop: '100%', borderRadius: 1, mb: 1 }} />
+                  <Skeleton height={18} sx={{ mb: 0.5 }} />
+                  <Skeleton width="60%" height={18} />
+                </Box>
+              ))
+            : bestProducts.map((p) => (
             <Card
               key={p.id}
               sx={{
@@ -460,6 +477,7 @@ const ShopDetailPage: React.FC = () => {
           ))}
         </Box>
       </Box>
+
     </Container>
   );
 };

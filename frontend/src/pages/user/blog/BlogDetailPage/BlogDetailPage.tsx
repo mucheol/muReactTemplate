@@ -41,6 +41,7 @@ const BlogDetailPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarLoading, setSidebarLoading] = useState(true);
 
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
@@ -56,46 +57,42 @@ const BlogDetailPage: React.FC = () => {
   const [prevPost, setPrevPost] = useState<BlogPost | null>(null);
   const [nextPost, setNextPost] = useState<BlogPost | null>(null);
 
-  // 데이터 가져오기
+  // 데이터 가져오기 - 메인 글 먼저, 사이드바/이전다음 글은 백그라운드에서
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
 
+      setLoading(true);
+      setSidebarLoading(true);
+      setPrevPost(null);
+      setNextPost(null);
+
+      // 1단계: 메인 글만 먼저 로드
       try {
-        setLoading(true);
-
-        const [postResponse, popularResponse, categoriesResponse, tagsResponse] = await Promise.all([
-          blogApi.getPost(Number(id)),
-          blogApi.getPopularPosts(),
-          blogApi.getCategories(),
-          blogApi.getTags(),
-        ]);
-
+        const postResponse = await blogApi.getPost(Number(id));
         setPost(postResponse.data);
-        setPopularPosts(popularResponse.data.slice(0, 3));
-        setCategories(categoriesResponse.data);
-        setTags(tagsResponse.data);
-
-        // 이전/다음 포스트
-        const currentId = Number(id);
-        try {
-          const prev = await blogApi.getPost(currentId - 1);
-          setPrevPost(prev.data);
-        } catch {
-          setPrevPost(null);
-        }
-        try {
-          const next = await blogApi.getPost(currentId + 1);
-          setNextPost(next.data);
-        } catch {
-          setNextPost(null);
-        }
       } catch (error) {
         console.error('포스트 로딩 실패:', error);
         setPost(null);
       } finally {
         setLoading(false);
       }
+
+      // 2단계: 사이드바 데이터 + 이전/다음 글은 백그라운드에서 로드
+      const currentId = Number(id);
+      const [popularResponse, categoriesResponse, tagsResponse] = await Promise.all([
+        blogApi.getPopularPosts().catch(() => ({ data: [] })),
+        blogApi.getCategories().catch(() => ({ data: [] })),
+        blogApi.getTags().catch(() => ({ data: [] })),
+      ]);
+      setPopularPosts((popularResponse.data as typeof popularPosts).slice(0, 3));
+      setCategories(categoriesResponse.data as string[]);
+      setTags(tagsResponse.data as string[]);
+      setSidebarLoading(false);
+
+      // 이전/다음 글은 완전 비동기
+      blogApi.getPost(currentId - 1).then((r) => setPrevPost(r.data)).catch(() => setPrevPost(null));
+      blogApi.getPost(currentId + 1).then((r) => setNextPost(r.data)).catch(() => setNextPost(null));
     };
 
     fetchData();
@@ -529,7 +526,7 @@ const BlogDetailPage: React.FC = () => {
         {/* 사이드바 */}
         <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 33.33%' }, maxWidth: { md: 320 } }}>
           <Stack spacing={3} sx={{ position: { md: 'sticky' }, top: { md: 20 } }}>
-            {/* 목차 */}
+            {/* 목차 (글 로드되면 바로 표시) */}
             {tableOfContents.length > 0 && (
               <Card>
                 <CardContent>
@@ -568,6 +565,11 @@ const BlogDetailPage: React.FC = () => {
                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
                   카테고리
                 </Typography>
+                {sidebarLoading ? (
+                  <Stack spacing={1}>
+                    {[...Array(4)].map((_, i) => <Skeleton key={i} height={36} sx={{ borderRadius: 1 }} />)}
+                  </Stack>
+                ) : (
                 <Stack spacing={1}>
                   {categories.map((category: string) => (
                     <Box
@@ -590,6 +592,7 @@ const BlogDetailPage: React.FC = () => {
                     </Box>
                   ))}
                 </Stack>
+                )}
               </CardContent>
             </Card>
 
@@ -599,6 +602,19 @@ const BlogDetailPage: React.FC = () => {
                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
                   인기 포스트
                 </Typography>
+                {sidebarLoading ? (
+                  <Stack spacing={2}>
+                    {[...Array(3)].map((_, i) => (
+                      <Stack key={i} direction="row" spacing={1}>
+                        <Skeleton variant="rectangular" width={60} height={60} sx={{ borderRadius: 1, flexShrink: 0 }} />
+                        <Box sx={{ flex: 1 }}>
+                          <Skeleton height={18} sx={{ mb: 0.5 }} />
+                          <Skeleton width="60%" height={14} />
+                        </Box>
+                      </Stack>
+                    ))}
+                  </Stack>
+                ) : (
                 <Stack spacing={2}>
                   {popularPosts.map((p) => (
                     <Box
@@ -641,6 +657,7 @@ const BlogDetailPage: React.FC = () => {
                     </Box>
                   ))}
                 </Stack>
+                )}
               </CardContent>
             </Card>
 
@@ -650,6 +667,11 @@ const BlogDetailPage: React.FC = () => {
                 <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
                   태그
                 </Typography>
+                {sidebarLoading ? (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {[...Array(8)].map((_, i) => <Skeleton key={i} width={i % 3 === 0 ? 60 : i % 2 === 0 ? 80 : 50} height={24} sx={{ borderRadius: 4 }} />)}
+                  </Box>
+                ) : (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {tags.map((tag: string) => (
                     <Chip
@@ -663,6 +685,7 @@ const BlogDetailPage: React.FC = () => {
                     />
                   ))}
                 </Box>
+                )}
               </CardContent>
             </Card>
           </Stack>

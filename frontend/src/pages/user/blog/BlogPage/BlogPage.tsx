@@ -28,6 +28,7 @@ const BlogPage: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarLoading, setSidebarLoading] = useState(true);
 
   // URL 파라미터에서 상태 읽기
   const currentPage = Number(searchParams.get('page')) || 1;
@@ -38,40 +39,43 @@ const BlogPage: React.FC = () => {
   // 검색 입력 상태
   const [searchInput, setSearchInput] = useState(searchQuery);
 
-  // 데이터 가져오기
+  // 데이터 가져오기 - 포스트 목록 먼저, 사이드바 백그라운드
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setSidebarLoading(true);
+
+      // 포스트 목록 파라미터
+      const params: { category?: string; tag?: string; search?: string } = {};
+      if (searchQuery) {
+        params.search = searchQuery;
+      } else if (selectedTag) {
+        params.tag = selectedTag;
+      } else if (selectedCategory !== '전체') {
+        params.category = selectedCategory;
+      }
+
+      // 1단계: 포스트 목록 먼저 로드
       try {
-        setLoading(true);
-
-        // 포스트 목록 가져오기
-        const params: { category?: string; tag?: string; search?: string } = {};
-        if (searchQuery) {
-          params.search = searchQuery;
-        } else if (selectedTag) {
-          params.tag = selectedTag;
-        } else if (selectedCategory !== '전체') {
-          params.category = selectedCategory;
-        }
-
-        const [postsResponse, popularResponse, categoriesResponse, tagsResponse] =
-          await Promise.all([
-            blogApi.getPosts(params),
-            blogApi.getPopularPosts(),
-            blogApi.getCategories(),
-            blogApi.getTags(),
-          ]);
-
+        const postsResponse = await blogApi.getPosts(params);
         setPosts(postsResponse.data);
-        setPopularPosts(popularResponse.data.slice(0, 3));
-        setCategories(categoriesResponse.data);
-        setTags(tagsResponse.data);
       } catch (error) {
         console.error('데이터 로딩 실패:', error);
         setPosts([]);
       } finally {
         setLoading(false);
       }
+
+      // 2단계: 사이드바 데이터 백그라운드 로드
+      const [popularResponse, categoriesResponse, tagsResponse] = await Promise.all([
+        blogApi.getPopularPosts().catch(() => ({ data: [] })),
+        blogApi.getCategories().catch(() => ({ data: [] })),
+        blogApi.getTags().catch(() => ({ data: [] })),
+      ]);
+      setPopularPosts((popularResponse.data as BlogPost[]).slice(0, 3));
+      setCategories(categoriesResponse.data as string[]);
+      setTags(tagsResponse.data as string[]);
+      setSidebarLoading(false);
     };
 
     fetchData();
@@ -206,7 +210,7 @@ const BlogPage: React.FC = () => {
 
         {/* 사이드바 */}
         <Box sx={{ flex: { xs: '1 1 auto', md: '0 0 33.33%' }, maxWidth: { md: 320 } }}>
-          {loading ? (
+          {sidebarLoading ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Skeleton variant="rectangular" height={56} sx={{ borderRadius: 1 }} />
               <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 1 }} />

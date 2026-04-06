@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CircularProgress, Box } from '@mui/material';
 
@@ -29,7 +29,24 @@ import {
   EventManagementPage,
   FaqManagementPage,
   ReservationManagementPage,
+  routePreloadMap,
 } from './lazyPreload';
+
+// 앱 로드 후 유휴 시간에 모든 페이지 청크를 미리 로드
+function useIdlePreload() {
+  useEffect(() => {
+    const preloadAll = () => {
+      Object.values(routePreloadMap).forEach((preload) => preload());
+    };
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(preloadAll, { timeout: 3000 });
+      return () => cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(preloadAll, 2000);
+      return () => clearTimeout(id);
+    }
+  }, []);
+}
 
 const PageFallback = () => (
   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
@@ -43,6 +60,7 @@ const PageFallback = () => (
  * - 관리자 페이지: AdminLayout 사용 (/admin/* 경로)
  */
 export const AppRouter: React.FC = () => {
+  useIdlePreload();
   return (
     <BrowserRouter>
       <ScrollToTop />
